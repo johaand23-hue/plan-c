@@ -3238,6 +3238,25 @@ updateHeroStats();
 // Capture party hash immediately before anything clears it
 var _capturedHash = window.location.hash || '';
 
+// ── PENDING NOTIF CHECK (defined here so restoreSession can call it) ─────────
+function checkPendingNotifs() {
+  if (!currentUser) return;
+  var allUsers = getAllUsers();
+  var fresh = allUsers[currentUser.email];
+  if (!fresh || !fresh.pendingNotifs || fresh.pendingNotifs.length === 0) return;
+  var notifs = fresh.pendingNotifs.slice();
+  fresh.pendingNotifs = [];
+  allUsers[currentUser.email] = fresh;
+  saveAllUsers(allUsers);
+  currentUser.pendingNotifs = [];
+  saveRegisteredUser(currentUser);
+  notifs.forEach(function(n, i) {
+    if (n.type === 'follow') {
+      setTimeout(function() { showFollowNotifToast(n.fromEmail, n.fromUsername); }, i * 1200);
+    }
+  });
+}
+
 // ── AUTO-RESTORE SESSION ────────────────────────────────────────────────────
 (function restoreSession() {
   const saved = loadFromStorage('session');
@@ -3250,16 +3269,22 @@ var _capturedHash = window.location.hash || '';
   updateNavForUser(fresh.username);
   renderLeaderboard();
   checkPendingNotifs();
-  updateBottomNav();
+  // updateBottomNav needs DOM — defer it
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    updateBottomNav();
+  } else {
+    window.addEventListener('DOMContentLoaded', function() { updateBottomNav(); });
+  }
 })();
 
 // Check for party invite after DOM is fully loaded
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() { checkForPartyInvite(); }, 100);
+  updateBottomNav();
 });
-// Also handle if DOMContentLoaded already fired
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
   setTimeout(function() { checkForPartyInvite(); }, 200);
+  updateBottomNav();
 }
 window.addEventListener('hashchange', function() { checkForPartyInvite(); });
 
@@ -5097,7 +5122,7 @@ function updateNavButton(username) {
   if (partyLink) partyLink.style.display = '';
   renderActivityFeed();
   setTimeout(checkPendingNotifs, 500);
-  updateBottomNav();
+  setTimeout(updateBottomNav, 50);
 }
 
 
@@ -7461,7 +7486,7 @@ function bottomNavClick(tab, el) {
 function updateBottomNav() {
   var partyTab = document.getElementById('bn-party-tab');
   var profileLabel = document.getElementById('bn-profile-label');
-  if (partyTab) partyTab.style.display = currentUser ? '' : 'none';
+  if (partyTab) partyTab.style.display = currentUser ? 'flex' : 'none';
   if (profileLabel) profileLabel.textContent = currentUser ? ('@' + currentUser.username.slice(0,8)) : 'Sign In';
 }
 
