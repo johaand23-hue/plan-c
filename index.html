@@ -4673,11 +4673,15 @@ async function generateVacationQuestsFromPage() {
 function openPartyPage() {
   if (!currentUser) { openAuth(); return; }
 
-  // Always save current party state before checking storage
   var stored = loadFromStorage('active_party');
 
-  // Restore party if it exists and has not ended
-  if (stored && stored.endTime && stored.endTime > Date.now() && !stored.ended) {
+  // Clear any broken/expired party from storage
+  if (stored && (!stored.endTime || stored.endTime <= Date.now() || stored.ended)) {
+    saveToStorage('active_party', null);
+    stored = null;
+  }
+
+  if (stored) {
     partyState = stored;
     document.getElementById('party-page').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -4685,7 +4689,6 @@ function openPartyPage() {
     return;
   }
 
-  // No active party — show create screen
   partyState = null;
   document.getElementById('party-page').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -4707,6 +4710,14 @@ function showCreateParty() {
 }
 
 function showActiveParty() {
+  // If party already ended, clear it and show create screen
+  if (partyState && partyState.endTime <= Date.now()) {
+    partyState = null;
+    saveToStorage('active_party', null);
+    showCreateParty();
+    populatePartyInviteChips();
+    return;
+  }
   document.getElementById('party-create-screen').style.display = 'none';
   document.getElementById('party-active-screen').style.display = 'block';
   document.getElementById('party-header-title').textContent = '🎉 ' + (partyState.name || 'PARTY').toUpperCase();
@@ -4715,17 +4726,32 @@ function showActiveParty() {
   var linkEl = document.getElementById('party-invite-link-display');
   if (linkEl && partyState.inviteCode) {
     var url = buildPartyInviteUrl(partyState);
-    linkEl.textContent = url;
-    linkEl.title = 'Tap to copy';
+    // Show truncated URL
+    var shortUrl = url.replace('https://', '').split('#')[0] + '#party=...';
+    linkEl.innerHTML = '<span style="color:var(--gold);">' + shortUrl + '</span>';
+    linkEl.title = url;
     linkEl.onclick = function() {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() {
-          showToast('📋', 'Link copied!', 'Paste it anywhere to invite people.', 'toast-success');
-        });
-      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function() {
+            showToast('📋', 'Link copied!', 'Paste it in iMessage to invite people.', 'toast-success');
+          });
+        } else {
+          // Fallback for Safari
+          var ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          showToast('📋', 'Link copied!', 'Paste it in iMessage to invite people.', 'toast-success');
+        }
+      } catch(e) { showToast('🔗', 'Party link', url, 'toast-info'); }
     };
     var wrap = document.getElementById('party-link-wrap');
-    if (wrap) wrap.style.display = '';
+    if (wrap) wrap.style.display = 'block';
   }
   var rewardLabel = partyState.rewardType === 'cash'
     ? '$' + partyState.cashAmount + ' cash prize'
