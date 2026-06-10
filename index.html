@@ -2013,6 +2013,24 @@ function getAllUsers() { return loadFromStorage('users') || {}; }
 function saveAllUsers(users) { saveToStorage('users', users); }
 
 // ── MASTER QUEST POOL (150 unique quests) ──────────────────────────────────
+// ── GLOBAL STATE ─────────────────────────────────────────────────────────────
+var partyState = null;
+var partyTimerInterval = null;
+var chatPollInterval = null;
+var pendingPartyInvite = null;
+var selectedDurationHours = 24;
+var selectedRewardSize = 'medium';
+var selectedRewardType = 'dares';
+var selectedYesDayHours = 6;
+var selectedCashTier = 'small';
+var notifications = [];
+var vpSelectedCats = [];
+var wheelRewards = [];
+var wheelAngle = 0;
+var isSpinning = false;
+var pushPermission = 'default';
+var _capturedHash = window.location.hash || '';
+
 const QUEST_POOL = [
   {id:1,icon:"🌅",name:"Watch the sunrise",desc:"Wake up before dawn and get somewhere worth seeing the sunrise — rooftop, hilltop, beach. Has to be intentional, not accidental.",pts:10,diff:"easy",type:"Nature",collab:true},
   {id:2,icon:"🎯",name:"Random restaurant roulette",desc:"Point blindly at a map 3 times. First two picks are the neighbourhood. Third is the cuisine. Eat wherever this lands. No complaining.",pts:10,diff:"easy",type:"Social",collab:true},
@@ -2431,7 +2449,7 @@ function filterQuests(filter, el) {
 }
 
 // ── AUTH — persists via localStorage ─────────────────────────────────────
-let currentUser = loadFromStorage('session') || null;
+currentUser = loadFromStorage('session') || null;
 // registeredUsers is always pulled fresh from localStorage
 function getRegisteredUsers() { return getAllUsers(); }
 function saveRegisteredUser(user) {
@@ -2765,7 +2783,7 @@ function renderStreakBar() {
 }
 
 // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────
-const notifications = [];
+notifications = [];
 let notifPanelOpen = false;
 
 function _basePushNotif(icon, title, msg) {
@@ -4464,7 +4482,7 @@ function renderActivityFeed() {
 }
 
 // ── VACATION PAGE ─────────────────────────────────────────────────────────
-let vpSelectedCats = ['food','culture','nature','thrill','social','urban','sport','creative'];
+vpSelectedCats = ['food','culture','nature','thrill','social','urban','sport','creative'];
 
 function openVacationPage() {
   const page = document.getElementById('vacation-page');
@@ -4995,9 +5013,9 @@ function triggerPartyEnd() {
 }
 
 // ── SPIN WHEEL ────────────────────────────────────────────────────────────────
-var wheelRewards = [];
-var wheelAngle = 0;
-var isSpinning = false;
+// var wheelRewards = [];
+// var wheelAngle = 0;
+// var isSpinning = false;
 
 function buildWheel(size) {
   var pool = REWARDS[size] || REWARDS.medium;
@@ -5161,11 +5179,11 @@ function updateNavButton(username) {
 
 
 // ── REWARD TYPE SYSTEM ────────────────────────────────────────────────────────
-var selectedRewardType = 'dares';
-var selectedRewardSize = 'medium';
-var selectedDurationHours = 24;
-var selectedYesDayHours = 6;
-var selectedCashTier = 'small';
+// var selectedRewardType = 'dares';
+// var selectedRewardSize = 'medium';
+// var selectedDurationHours = 24;
+// var selectedYesDayHours = 6;
+// var selectedCashTier = 'small';
 var CASH_TIERS = { micro: 5, small: 10, medium: 25, big: 50 };
 
 // Yes Day wheel rewards
@@ -5254,7 +5272,7 @@ function onCashCustomInput(input) {
 
 
 // ── LOCAL PUSH NOTIFICATIONS (Web Notification API) ──────────────────────────
-var pushPermission = 'default';
+// var pushPermission = 'default';
 
 function requestPushPermission() {
   if (!('Notification' in window)) return;
@@ -5401,7 +5419,7 @@ function updateHeroStats() {
 
 
 // ── PARTY CHAT ────────────────────────────────────────────────────────────────
-var chatPollInterval = null;
+// var chatPollInterval = null;
 
 var PARTY_EMOJIS = [
   '😂','🔥','💀','🎉','😤','💪','🏆','⚡',
@@ -7235,7 +7253,7 @@ function handleProofVote(btn) {
 
 
 // ── PARTY INVITE LINK SYSTEM ──────────────────────────────────────────────────
-var pendingPartyInvite = null;
+// var pendingPartyInvite = null;
 
 function checkForPartyInvite() {
   try {
