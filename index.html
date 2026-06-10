@@ -4858,10 +4858,15 @@ function createParty() {
   schedulePartyPings(partyState);
   showActiveParty();
 
-  // Open iMessage with invite
+  // Open iMessage without navigating away from the party page
   setTimeout(function() {
-    window.location.href = smsUri;
-  }, 800);
+    var a = document.createElement('a');
+    a.href = smsUri;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { a.remove(); }, 1000);
+  }, 600);
 }
 
 function startPartyTimer() {
@@ -5656,7 +5661,13 @@ function inviteFriendFromParty() {
     msg = username + ' is challenging you to join Plan-C — earn points completing real-world adventures and compete in parties. Join here: ' + siteUrl + '?ref=' + encodeURIComponent(username);
   }
 
-  window.location.href = 'sms:&body=' + encodeURIComponent(msg);
+  var smsHref = 'sms:&body=' + encodeURIComponent(msg);
+  var a = document.createElement('a');
+  a.href = smsHref;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() { a.remove(); }, 1000);
 }
 
 function saveProfileApiKey() {
