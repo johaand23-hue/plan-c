@@ -4789,6 +4789,9 @@ function populatePartyInviteChips() {
 }
 
 function createParty() {
+  try { _createParty(); } catch(e) { showToast('❌', 'Party error', e.message, 'toast-info'); console.error('createParty error:', e); }
+}
+function _createParty() {
   if (!currentUser) return;
   var name = (document.getElementById('party-name-input').value || '').trim();
   if (!name) { showToast('🎉', 'Give your party a name!', 'Enter a name before starting.', 'toast-info'); return; }
