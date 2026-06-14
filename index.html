@@ -4949,8 +4949,28 @@ function renderPartyLeaderboard() {
   var AV_COLORS = ['#2e3a48','#3a4255','#28384a','#3a3a48','#323845'];
   var RANK_ICONS = ['🥇','🥈','🥉'];
 
+  // Start with original members from party
+  var memberMap = {};
+  (partyState.members || []).forEach(function(m) {
+    memberMap[m.email] = { email: m.email, username: m.username, startPts: m.startPts || 0 };
+  });
+
+  // Also pull anyone who joined via chat join messages
+  var chatMsgs = loadChatMessages();
+  chatMsgs.forEach(function(msg) {
+    if (msg.subtype === 'join' && msg.joinerEmail && !memberMap[msg.joinerEmail]) {
+      memberMap[msg.joinerEmail] = {
+        email: msg.joinerEmail,
+        username: msg.joinerUsername,
+        startPts: msg.joinerStartPts || 0
+      };
+      // Also add to partyState.members so they persist
+      partyState.members.push(memberMap[msg.joinerEmail]);
+    }
+  });
+
   // Calculate pts earned since party started for each member
-  var ranked = partyState.members.map(function(m) {
+  var ranked = Object.values(memberMap).map(function(m) {
     var u = allUsers[m.email] || {};
     var currentPts = u.pts || 0;
     var earned = Math.max(0, currentPts - m.startPts);
@@ -7401,7 +7421,21 @@ function joinPartyFromInvite() {
   partyState = party;
 
   var oldState = partyState;
-  postSystemMessage('👋 ' + currentUser.username + ' just joined the party!');
+  // Post join message with joiner data embedded so leaderboard can pick it up
+  var joinMsg = {
+    id: Date.now(),
+    type: 'system',
+    subtype: 'join',
+    text: '👋 ' + currentUser.username + ' just joined the party!',
+    joinerEmail: currentUser.email,
+    joinerUsername: currentUser.username,
+    joinerStartPts: currentUser.pts || 0,
+    time: Date.now()
+  };
+  var msgs = loadChatMessages();
+  msgs.push(joinMsg);
+  saveChatMessages(msgs);
+  renderChatMessages();
   partyState = oldState;
 
   pushNotif('🎉', 'You joined ' + party.name + '!', 'Party is on — go earn those points!');
