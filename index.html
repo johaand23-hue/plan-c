@@ -1619,6 +1619,11 @@
     }
   }
 
+
+  .ob-step { animation: fadeIn 0.3s ease; }
+  .ob-next-btn { width:100%;padding:14px;border-radius:8px;background:var(--gold);border:none;color:var(--earth);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif; }
+  .ob-dot { width:8px;height:8px;border-radius:50%;background:rgba(200,208,220,0.2);transition:background 0.3s; }
+  .ob-dot.active { background:var(--gold); }
 </style>
 </head>
 <body>
@@ -1703,12 +1708,25 @@
         <span id="quest-countdown" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px;">00:00:00</span>
       </div>
     </div>
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="filterQuests('all', this)">All</button>
-      <button class="filter-tab" onclick="filterQuests('easy', this)">Easy</button>
-      <button class="filter-tab" onclick="filterQuests('medium', this)">Medium</button>
-      <button class="filter-tab" onclick="filterQuests('hard', this)">Hard</button>
-      <button class="filter-tab" onclick="filterQuests('extreme', this)">Extreme</button>
+    <div style="display:flex;flex-direction:column;gap:0.4rem">
+      <div class="filter-tabs" id="diff-tabs">
+        <button class="filter-tab active" onclick="filterQuests('all',this,'diff')">All</button>
+        <button class="filter-tab" onclick="filterQuests('easy',this,'diff')">Easy</button>
+        <button class="filter-tab" onclick="filterQuests('medium',this,'diff')">Medium</button>
+        <button class="filter-tab" onclick="filterQuests('hard',this,'diff')">Hard</button>
+        <button class="filter-tab" onclick="filterQuests('extreme',this,'diff')">Extreme</button>
+      </div>
+      <div class="filter-tabs" id="cat-tabs">
+        <button class="filter-tab active" onclick="filterQuests('all',this,'cat')" style="font-size:10px">🌍 All</button>
+        <button class="filter-tab" onclick="filterQuests('Sport',this,'cat')" style="font-size:10px">🏃 Sport</button>
+        <button class="filter-tab" onclick="filterQuests('Nature',this,'cat')" style="font-size:10px">🌿 Nature</button>
+        <button class="filter-tab" onclick="filterQuests('Urban',this,'cat')" style="font-size:10px">🏙️ Urban</button>
+        <button class="filter-tab" onclick="filterQuests('Social',this,'cat')" style="font-size:10px">👥 Social</button>
+        <button class="filter-tab" onclick="filterQuests('Food',this,'cat')" style="font-size:10px">🍕 Food</button>
+        <button class="filter-tab" onclick="filterQuests('Kindness',this,'cat')" style="font-size:10px">💛 Kind</button>
+        <button class="filter-tab" onclick="filterQuests('Thrill',this,'cat')" style="font-size:10px">🎯 Thrill</button>
+        <button class="filter-tab" onclick="filterQuests('Culture',this,'cat')" style="font-size:10px">🎨 Culture</button>
+      </div>
     </div>
   </div>
   <div class="quests-grid" id="quests-grid"></div>
@@ -2002,6 +2020,28 @@
 </div>
 
 <script>
+// ── ONBOARDING ───────────────────────────────────────────────────────────────
+function showOnboarding() {
+  var el = document.getElementById('onboarding-overlay');
+  if (el) { el.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+}
+function obStep(n) {
+  for (var i = 1; i <= 4; i++) {
+    var s = document.getElementById('ob-' + i);
+    var d = document.getElementById('ob-dot-' + i);
+    if (s) s.style.display = (i === n) ? 'block' : 'none';
+    if (d) d.classList.toggle('active', i === n);
+  }
+}
+function obFinish() {
+  saveToStorage('ob_done', true);
+  var el = document.getElementById('onboarding-overlay');
+  if (el) el.style.display = 'none';
+  document.body.style.overflow = '';
+  openAuth();
+}
+
+
 // ── STORAGE HELPERS ──────────────────────────────────────────────────────
 function saveToStorage(key, val) {
   try { localStorage.setItem('planc_' + key, JSON.stringify(val)); } catch(e) {}
@@ -2013,24 +2053,6 @@ function getAllUsers() { return loadFromStorage('users') || {}; }
 function saveAllUsers(users) { saveToStorage('users', users); }
 
 // ── MASTER QUEST POOL (150 unique quests) ──────────────────────────────────
-// ── GLOBAL STATE ─────────────────────────────────────────────────────────────
-var partyState = null;
-var partyTimerInterval = null;
-var chatPollInterval = null;
-var pendingPartyInvite = null;
-var selectedDurationHours = 24;
-var selectedRewardSize = 'medium';
-var selectedRewardType = 'dares';
-var selectedYesDayHours = 6;
-var selectedCashTier = 'small';
-var notifications = [];
-var vpSelectedCats = [];
-var wheelRewards = [];
-var wheelAngle = 0;
-var isSpinning = false;
-var pushPermission = 'default';
-var _capturedHash = window.location.hash || '';
-
 const QUEST_POOL = [
   {id:1,icon:"🌅",name:"Watch the sunrise",desc:"Wake up before dawn and get somewhere worth seeing the sunrise — rooftop, hilltop, beach. Has to be intentional, not accidental.",pts:10,diff:"easy",type:"Nature",collab:true},
   {id:2,icon:"🎯",name:"Random restaurant roulette",desc:"Point blindly at a map 3 times. First two picks are the neighbourhood. Third is the cuisine. Eat wherever this lands. No complaining.",pts:10,diff:"easy",type:"Social",collab:true},
@@ -2241,8 +2263,31 @@ const QUEST_POOL = [
   {id:209,icon:"⛰️",name:"Free solo scramble",desc:"Complete a serious ridge scramble or exposed rock route without ropes. Must be grade 3 or above. Solo only.",pts:90,diff:"extreme",type:"Physical",collab:false,level:"extreme"},
   {id:210,icon:"🌋",name:"Volcanic region trek — no guide",desc:"Trek through an active volcanic zone or lava field without a guide. Navigate by map only. Minimum 8 hours.",pts:85,diff:"extreme",type:"Outdoors",collab:true,level:"extreme"},
   {id:211,icon:"🏇",name:"Wild horse riding",desc:"Ride an untamed or semi-wild horse in an open landscape for at least 30 minutes without falling off.",pts:75,diff:"extreme",type:"Thrill",collab:false,level:"extreme"},
-  {id:212,icon:"🌊",name:"Storm swimming",desc:"Swim in the sea during a storm with waves above 8 feet. Lifeguard or safety swimmer must be present. Time yourself for 15 minutes.",pts:80,diff:"extreme",type:"Thrill",collab:false,level:"extreme"},
+  {id:212,icon:"🌊",name:"Storm swimming",desc:"Swim in the sea during a storm with waves above 8 feet. Lifeguard or safety swimmer must be present. Time yourself for 15 minutes.",pts:80,diff:"extreme",type:"Thrill",collab:false,level:"extreme"},,
+  {icon:"🏀",name:"Shoot 20 Free Throws",desc:"Find a hoop and shoot 20 free throws. Track how many you make.",pts:10,diff:"easy",type:"Sport",collab:false},
+  {icon:"🏀",name:"Free Throw Streak",desc:"Hit 5 free throws in a row. Full distance, proper form.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏃",name:"Run 800m",desc:"Run 800m without stopping. Track it on your phone.",pts:15,diff:"easy",type:"Sport",collab:false},
+  {icon:"🏃",name:"Run a 5K",desc:"Run 5 kilometers without walking. Screenshot your time.",pts:35,diff:"medium",type:"Sport",collab:false},
+  {icon:"💪",name:"50 Pushups",desc:"Do 50 pushups. Break into sets but finish all 50 in one session.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏋️",name:"100 Pushups Challenge",desc:"Complete 100 pushups in one day. Split however you want.",pts:40,diff:"hard",type:"Sport",collab:false},
+  {icon:"⚽",name:"Juggle 30 Times",desc:"Keep a soccer ball in the air for 30 consecutive touches.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🎾",name:"Rally 20 Times",desc:"Rally back and forth with a partner 20 times without it dropping.",pts:15,diff:"easy",type:"Sport",collab:true},
+  {icon:"🏊",name:"Swim 500m",desc:"Swim 500 meters nonstop. Count your laps.",pts:30,diff:"medium",type:"Sport",collab:false},
+  {icon:"🚴",name:"Bike 10 Miles",desc:"Ride a bike for 10 miles. Any terrain counts.",pts:25,diff:"medium",type:"Sport",collab:true},
+  {icon:"🧘",name:"Hold a 2-Minute Plank",desc:"Hold a plank for a full 2 minutes. Film it for proof.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏒",name:"Score on a Goalie",desc:"Get access to a net with a goalie and score on them.",pts:25,diff:"medium",type:"Sport",collab:true},
+  {icon:"🏌️",name:"Hit the Driving Range",desc:"Go to a golf driving range and hit a full bucket of balls.",pts:15,diff:"easy",type:"Sport",collab:true},
+  {icon:"🥊",name:"5 Minutes on the Heavy Bag",desc:"Hit a heavy bag at a gym for 5 consecutive minutes.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏋️",name:"Personal Best Day",desc:"Beat one of your personal bests — lift, run, swim, anything. Document it.",pts:30,diff:"medium",type:"Sport",collab:false},
+  {icon:"🎂",name:"Bake Something for Someone",desc:"Bake a cake, cookies, or bread and give it to someone who isn't expecting it.",pts:25,diff:"medium",type:"Kindness",collab:false},
+  {icon:"💌",name:"Tell Someone What They Mean to You",desc:"Tell a friend, family member, or colleague exactly why you value them. In person or handwritten only.",pts:20,diff:"medium",type:"Kindness",collab:false},
+  {icon:"🧹",name:"Do a Chore Without Being Asked",desc:"Take on a task for someone before they ask. Don't mention it afterward.",pts:15,diff:"easy",type:"Kindness",collab:false},
+  {icon:"☕",name:"Buy a Stranger's Coffee",desc:"Pay for the order of the person behind you in line. Walk away before they can thank you.",pts:15,diff:"easy",type:"Kindness",collab:false},
+  {icon:"📞",name:"Call Someone You've Lost Touch With",desc:"Someone you haven't spoken to in over a year. Actually call them. No text.",pts:20,diff:"medium",type:"Kindness",collab:false}
 ];
+
+// Filter out any malformed entries
+const QUEST_POOL_CLEAN = QUEST_POOL.filter(function(q) { return q && q.diff && q.name; });
 
 // ── GLOBAL STATE
 let activeQuests = []; // max 3 concurrent quests
@@ -2345,7 +2390,7 @@ function getDailyQuests() {
   const rand = seededRand(dateKey);
 
   // Fisher-Yates shuffle with seeded random
-  const pool = [...QUEST_POOL];
+  const pool = [...QUEST_POOL_CLEAN];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -2355,7 +2400,7 @@ function getDailyQuests() {
   const picked = [];
   const diffs = ['easy','medium','hard','extreme'];
   const buckets = {};
-  diffs.forEach(d => buckets[d] = pool.filter(q => q.diff === d));
+  diffs.forEach(d => buckets[d] = pool.filter(q => q && q.diff === d));
 
   // Guarantee at least 1 easy, 1 medium, 1 hard, 1 extreme
   diffs.forEach(d => {
@@ -2437,19 +2482,23 @@ function renderLeaderboard() {
 
 // leaderboard rendering handled by renderLeaderboardFiltered
 
-function filterQuests(filter, el) {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  currentFilter = filter;
-  if (currentUser) {
-    renderQuestsForLevel();
+var currentCatFilter = 'all';
+function filterQuests(filter, el, filterType) {
+  if (filterType === 'cat') {
+    document.querySelectorAll('#cat-tabs .filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+    currentCatFilter = filter;
   } else {
-    renderQuestsFromPool(quests, filter);
+    document.querySelectorAll('#diff-tabs .filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+    currentFilter = filter;
   }
+  if (currentUser) { renderQuestsForLevel(); }
+  else { renderQuestsFromPool(quests, currentFilter); }
 }
 
 // ── AUTH — persists via localStorage ─────────────────────────────────────
-currentUser = loadFromStorage('session') || null;
+let currentUser = loadFromStorage('session') || null;
 // registeredUsers is always pulled fresh from localStorage
 function getRegisteredUsers() { return getAllUsers(); }
 function saveRegisteredUser(user) {
@@ -2783,7 +2832,7 @@ function renderStreakBar() {
 }
 
 // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────
-notifications = [];
+const notifications = [];
 let notifPanelOpen = false;
 
 function _basePushNotif(icon, title, msg) {
@@ -3256,7 +3305,7 @@ updateHeroStats();
 // Capture party hash immediately before anything clears it
 var _capturedHash = window.location.hash || '';
 
-// ── PENDING NOTIF CHECK (defined here so restoreSession can call it) ─────────
+// ── PENDING NOTIF CHECK ──────────────────────────────────────────────────────
 function checkPendingNotifs() {
   if (!currentUser) return;
   var allUsers = getAllUsers();
@@ -3287,22 +3336,16 @@ function checkPendingNotifs() {
   updateNavForUser(fresh.username);
   renderLeaderboard();
   checkPendingNotifs();
-  // updateBottomNav needs DOM — defer it
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    updateBottomNav();
-  } else {
-    window.addEventListener('DOMContentLoaded', function() { updateBottomNav(); });
-  }
+  updateBottomNav();
 })();
 
 // Check for party invite after DOM is fully loaded
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() { checkForPartyInvite(); }, 100);
-  updateBottomNav();
 });
+// Also handle if DOMContentLoaded already fired
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
   setTimeout(function() { checkForPartyInvite(); }, 200);
-  updateBottomNav();
 }
 window.addEventListener('hashchange', function() { checkForPartyInvite(); });
 
@@ -4482,7 +4525,7 @@ function renderActivityFeed() {
 }
 
 // ── VACATION PAGE ─────────────────────────────────────────────────────────
-vpSelectedCats = ['food','culture','nature','thrill','social','urban','sport','creative'];
+let vpSelectedCats = ['food','culture','nature','thrill','social','urban','sport','creative'];
 
 function openVacationPage() {
   const page = document.getElementById('vacation-page');
@@ -4691,15 +4734,11 @@ async function generateVacationQuestsFromPage() {
 function openPartyPage() {
   if (!currentUser) { openAuth(); return; }
 
+  // Always save current party state before checking storage
   var stored = loadFromStorage('active_party');
 
-  // Clear any broken/expired party from storage
-  if (stored && (!stored.endTime || stored.endTime <= Date.now() || stored.ended)) {
-    saveToStorage('active_party', null);
-    stored = null;
-  }
-
-  if (stored) {
+  // Restore party if it exists and has not ended
+  if (stored && stored.endTime && stored.endTime > Date.now() && !stored.ended) {
     partyState = stored;
     document.getElementById('party-page').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -4707,6 +4746,7 @@ function openPartyPage() {
     return;
   }
 
+  // No active party — show create screen
   partyState = null;
   document.getElementById('party-page').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -4728,48 +4768,51 @@ function showCreateParty() {
 }
 
 function showActiveParty() {
-  // If party already ended, clear it and show create screen
-  if (partyState && partyState.endTime <= Date.now()) {
-    partyState = null;
-    saveToStorage('active_party', null);
-    showCreateParty();
-    populatePartyInviteChips();
-    return;
-  }
   document.getElementById('party-create-screen').style.display = 'none';
   document.getElementById('party-active-screen').style.display = 'block';
   document.getElementById('party-header-title').textContent = '🎉 ' + (partyState.name || 'PARTY').toUpperCase();
-  document.getElementById('active-party-name').textContent = partyState.name || 'Party';
+  var _pnEl = document.getElementById('active-party-name');
+  if (_pnEl) {
+    _pnEl.textContent = partyState.name || 'Party';
+    _pnEl.title = 'Tap to rename';
+    _pnEl.style.cursor = 'pointer';
+    _pnEl.onclick = function() {
+      var n = prompt('Rename party:', partyState.name || 'Party');
+      if (n && n.trim()) {
+        partyState.name = n.trim();
+        saveToStorage('active_party', partyState);
+        _pnEl.textContent = partyState.name;
+        var hdr = document.getElementById('party-header-title');
+        if (hdr) hdr.textContent = '🎉 ' + partyState.name.toUpperCase();
+        postSystemMessage('✏️ Party renamed to "' + partyState.name + '"');
+      }
+    };
+  }
+  // Show party goal banner
+  var _gb = document.getElementById('party-goal-banner');
+  var _gt2 = document.getElementById('party-goal-text');
+  if (_gb && partyState.goalType) {
+    var _gstr = partyState.goalType === 'points' ? 'First to ' + (partyState.goalTarget||100) + ' pts wins' :
+                partyState.goalType === 'quests'  ? 'Most quests completed wins' : 'Longest streak wins';
+    if (_gt2) _gt2.textContent = _gstr;
+    _gb.style.display = 'block';
+  }
+
   // Show the invite link
   var linkEl = document.getElementById('party-invite-link-display');
   if (linkEl && partyState.inviteCode) {
     var url = buildPartyInviteUrl(partyState);
-    // Show truncated URL
-    var shortUrl = url.replace('https://', '').split('#')[0] + '#party=...';
-    linkEl.innerHTML = '<span style="color:var(--gold);">' + shortUrl + '</span>';
-    linkEl.title = url;
+    linkEl.textContent = url;
+    linkEl.title = 'Tap to copy';
     linkEl.onclick = function() {
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(function() {
-            showToast('📋', 'Link copied!', 'Paste it in iMessage to invite people.', 'toast-success');
-          });
-        } else {
-          // Fallback for Safari
-          var ta = document.createElement('textarea');
-          ta.value = url;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          ta.remove();
-          showToast('📋', 'Link copied!', 'Paste it in iMessage to invite people.', 'toast-success');
-        }
-      } catch(e) { showToast('🔗', 'Party link', url, 'toast-info'); }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() {
+          showToast('📋', 'Link copied!', 'Paste it anywhere to invite people.', 'toast-success');
+        });
+      }
     };
     var wrap = document.getElementById('party-link-wrap');
-    if (wrap) wrap.style.display = 'block';
+    if (wrap) wrap.style.display = '';
   }
   var rewardLabel = partyState.rewardType === 'cash'
     ? '$' + partyState.cashAmount + ' cash prize'
@@ -4833,9 +4876,6 @@ function populatePartyInviteChips() {
 }
 
 function createParty() {
-  try { _createParty(); } catch(e) { showToast('❌', 'Party error', e.message, 'toast-info'); console.error('createParty error:', e); }
-}
-function _createParty() {
   if (!currentUser) return;
   var name = (document.getElementById('party-name-input').value || '').trim();
   if (!name) { showToast('🎉', 'Give your party a name!', 'Enter a name before starting.', 'toast-info'); return; }
@@ -4871,6 +4911,12 @@ function _createParty() {
 
   saveToStorage('active_party', partyState);
 
+  // Party goal
+  var _gt = document.getElementById('party-goal-type');
+  var _gv = document.getElementById('party-goal-input');
+  partyState.goalType   = _gt ? _gt.value : 'points';
+  partyState.goalTarget = _gv ? (parseInt(_gv.value) || 100) : 100;
+
   // Generate shareable invite link — use hash so iMessage/SMS doesn't mangle it
   var partyJson = JSON.stringify({
     id: partyState.id,
@@ -4905,15 +4951,10 @@ function _createParty() {
   schedulePartyPings(partyState);
   showActiveParty();
 
-  // Open iMessage without navigating away from the party page
+  // Open iMessage with invite
   setTimeout(function() {
-    var a = document.createElement('a');
-    a.href = smsUri;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function() { a.remove(); }, 1000);
-  }, 600);
+    window.location.href = smsUri;
+  }, 800);
 }
 
 function startPartyTimer() {
@@ -4949,28 +4990,8 @@ function renderPartyLeaderboard() {
   var AV_COLORS = ['#2e3a48','#3a4255','#28384a','#3a3a48','#323845'];
   var RANK_ICONS = ['🥇','🥈','🥉'];
 
-  // Start with original members from party
-  var memberMap = {};
-  (partyState.members || []).forEach(function(m) {
-    memberMap[m.email] = { email: m.email, username: m.username, startPts: m.startPts || 0 };
-  });
-
-  // Also pull anyone who joined via chat join messages
-  var chatMsgs = loadChatMessages();
-  chatMsgs.forEach(function(msg) {
-    if (msg.subtype === 'join' && msg.joinerEmail && !memberMap[msg.joinerEmail]) {
-      memberMap[msg.joinerEmail] = {
-        email: msg.joinerEmail,
-        username: msg.joinerUsername,
-        startPts: msg.joinerStartPts || 0
-      };
-      // Also add to partyState.members so they persist
-      partyState.members.push(memberMap[msg.joinerEmail]);
-    }
-  });
-
   // Calculate pts earned since party started for each member
-  var ranked = Object.values(memberMap).map(function(m) {
+  var ranked = partyState.members.map(function(m) {
     var u = allUsers[m.email] || {};
     var currentPts = u.pts || 0;
     var earned = Math.max(0, currentPts - m.startPts);
@@ -5033,9 +5054,9 @@ function triggerPartyEnd() {
 }
 
 // ── SPIN WHEEL ────────────────────────────────────────────────────────────────
-// var wheelRewards = [];
-// var wheelAngle = 0;
-// var isSpinning = false;
+var wheelRewards = [];
+var wheelAngle = 0;
+var isSpinning = false;
 
 function buildWheel(size) {
   var pool = REWARDS[size] || REWARDS.medium;
@@ -5194,16 +5215,14 @@ function updateNavButton(username) {
   if (partyLink) partyLink.style.display = '';
   renderActivityFeed();
   setTimeout(checkPendingNotifs, 500);
-  setTimeout(updateBottomNav, 50);
+  updateBottomNav();
 }
 
 
 // ── REWARD TYPE SYSTEM ────────────────────────────────────────────────────────
-// var selectedRewardType = 'dares';
-// var selectedRewardSize = 'medium';
-// var selectedDurationHours = 24;
-// var selectedYesDayHours = 6;
-// var selectedCashTier = 'small';
+var selectedRewardType = 'dares';
+var selectedYesDayHours = 6;
+var selectedCashTier = 'small';
 var CASH_TIERS = { micro: 5, small: 10, medium: 25, big: 50 };
 
 // Yes Day wheel rewards
@@ -5292,7 +5311,7 @@ function onCashCustomInput(input) {
 
 
 // ── LOCAL PUSH NOTIFICATIONS (Web Notification API) ──────────────────────────
-// var pushPermission = 'default';
+var pushPermission = 'default';
 
 function requestPushPermission() {
   if (!('Notification' in window)) return;
@@ -5439,7 +5458,7 @@ function updateHeroStats() {
 
 
 // ── PARTY CHAT ────────────────────────────────────────────────────────────────
-// var chatPollInterval = null;
+var chatPollInterval = null;
 
 var PARTY_EMOJIS = [
   '😂','🔥','💀','🎉','😤','💪','🏆','⚡',
@@ -5730,13 +5749,7 @@ function inviteFriendFromParty() {
     msg = username + ' is challenging you to join Plan-C — earn points completing real-world adventures and compete in parties. Join here: ' + siteUrl + '?ref=' + encodeURIComponent(username);
   }
 
-  var smsHref = 'sms:&body=' + encodeURIComponent(msg);
-  var a = document.createElement('a');
-  a.href = smsHref;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function() { a.remove(); }, 1000);
+  window.location.href = 'sms:&body=' + encodeURIComponent(msg);
 }
 
 function saveProfileApiKey() {
@@ -7273,7 +7286,7 @@ function handleProofVote(btn) {
 
 
 // ── PARTY INVITE LINK SYSTEM ──────────────────────────────────────────────────
-// var pendingPartyInvite = null;
+var pendingPartyInvite = null;
 
 function checkForPartyInvite() {
   try {
@@ -7421,21 +7434,7 @@ function joinPartyFromInvite() {
   partyState = party;
 
   var oldState = partyState;
-  // Post join message with joiner data embedded so leaderboard can pick it up
-  var joinMsg = {
-    id: Date.now(),
-    type: 'system',
-    subtype: 'join',
-    text: '👋 ' + currentUser.username + ' just joined the party!',
-    joinerEmail: currentUser.email,
-    joinerUsername: currentUser.username,
-    joinerStartPts: currentUser.pts || 0,
-    time: Date.now()
-  };
-  var msgs = loadChatMessages();
-  msgs.push(joinMsg);
-  saveChatMessages(msgs);
-  renderChatMessages();
+  postSystemMessage('👋 ' + currentUser.username + ' just joined the party!');
   partyState = oldState;
 
   pushNotif('🎉', 'You joined ' + party.name + '!', 'Party is on — go earn those points!');
@@ -7580,7 +7579,7 @@ function bottomNavClick(tab, el) {
 function updateBottomNav() {
   var partyTab = document.getElementById('bn-party-tab');
   var profileLabel = document.getElementById('bn-profile-label');
-  if (partyTab) partyTab.style.display = currentUser ? 'flex' : 'none';
+  if (partyTab) partyTab.style.display = currentUser ? '' : 'none';
   if (profileLabel) profileLabel.textContent = currentUser ? ('@' + currentUser.username.slice(0,8)) : 'Sign In';
 }
 
@@ -8072,6 +8071,11 @@ function updateBottomNav() {
       <div style="font-size:12px;color:var(--stone);font-family:'DM Mono',monospace;" id="active-party-sub"></div>
     </div>
 
+    <!-- Party goal banner -->
+    <div id="party-goal-banner" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:0.65rem 1rem;margin-bottom:0.75rem;text-align:center">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--stone);margin-bottom:2px">Goal</div>
+      <div id="party-goal-text" style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);letter-spacing:1px"></div>
+    </div>
     <!-- Invite link -->
     <div id="party-link-wrap" style="display:none;background:rgba(17,18,20,0.5);border:1px solid rgba(240,180,41,0.25);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;">
       <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-family:'DM Mono',monospace;margin-bottom:4px;">Party invite link</div>
@@ -8237,6 +8241,56 @@ function updateBottomNav() {
     <div class="bn-label" id="bn-profile-label">Sign In</div>
   </button>
 </nav>
+
+
+<!-- ONBOARDING -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(10,11,13,0.97);overflow-y:auto;-webkit-overflow-scrolling:touch">
+  <div style="max-width:420px;margin:0 auto;padding:3rem 1.5rem 5rem;text-align:center">
+    <div id="ob-1" class="ob-step">
+      <div style="font-size:52px;margin-bottom:1rem">🎯</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:var(--stone);margin-bottom:0.5rem">WELCOME TO</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--cream);letter-spacing:2px;line-height:1;margin-bottom:1rem">PLAN-C</div>
+      <p style="font-size:15px;color:var(--stone);line-height:1.7;margin-bottom:2rem">Plan-C turns your everyday life into an adventure. Complete real-world quests, earn points, and compete with friends.</p>
+      <button class="ob-next-btn" onclick="obStep(2)">Let's go →</button>
+    </div>
+    <div id="ob-2" class="ob-step" style="display:none">
+      <div style="font-size:52px;margin-bottom:1rem">📋</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cream);letter-spacing:1px;margin-bottom:1rem">Pick Your Quests</div>
+      <p style="font-size:14px;color:var(--stone);line-height:1.7;margin-bottom:1.25rem">Browse the quest board and accept up to <strong style="color:var(--cream)">3 at a time</strong>. Filter by difficulty — Easy, Medium, Hard — or by type: Sport, Nature, Urban, Kindness and more.</p>
+      <div style="background:rgba(17,18,20,0.6);border:1px solid rgba(200,208,220,0.1);border-radius:8px;padding:1rem;margin-bottom:1.5rem;text-align:left">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem"><span>🟢</span><span style="font-size:13px;color:var(--mist)"><strong>Easy</strong> — quick wins, 10–20 pts</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem"><span>🟡</span><span style="font-size:13px;color:var(--mist)"><strong>Medium</strong> — takes effort, 25–40 pts</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem"><span>🔴</span><span style="font-size:13px;color:var(--mist)"><strong>Hard</strong> — real challenges, 45–75 pts</span></div>
+      </div>
+      <button class="ob-next-btn" onclick="obStep(3)">Got it →</button>
+    </div>
+    <div id="ob-3" class="ob-step" style="display:none">
+      <div style="font-size:52px;margin-bottom:1rem">🏆</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cream);letter-spacing:1px;margin-bottom:1rem">Earn Points</div>
+      <p style="font-size:14px;color:var(--stone);line-height:1.7;margin-bottom:1.25rem">Complete a quest and submit photo or video proof. Points go straight to the leaderboard.</p>
+      <div style="background:rgba(17,18,20,0.6);border:1px solid rgba(200,208,220,0.1);border-radius:8px;padding:1rem;margin-bottom:1.5rem;text-align:left">
+        <div style="font-size:11px;color:var(--stone);margin-bottom:0.5rem;letter-spacing:2px;text-transform:uppercase">HOW TO COMPLETE</div>
+        <div style="font-size:13px;color:var(--mist);line-height:1.9">1. Accept a quest from the board<br>2. Go do it in real life<br>3. Tap the quest → submit proof<br>4. Points added instantly</div>
+      </div>
+      <button class="ob-next-btn" onclick="obStep(4)">Nice →</button>
+    </div>
+    <div id="ob-4" class="ob-step" style="display:none">
+      <div style="font-size:52px;margin-bottom:1rem">🎉</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--cream);letter-spacing:1px;margin-bottom:1rem">Start a Party</div>
+      <p style="font-size:14px;color:var(--stone);line-height:1.7;margin-bottom:1.25rem">Create a party, set a goal, share your link. Compete head-to-head with your crew. Proofs go to party chat — everyone votes on what counts.</p>
+      <div style="background:rgba(17,18,20,0.6);border:1px solid rgba(200,208,220,0.1);border-radius:8px;padding:1rem;margin-bottom:1.5rem;text-align:left">
+        <div style="font-size:13px;color:var(--mist);line-height:1.9">✅ Set stakes — dares, yes day, or cash<br>✅ Rename the party anytime<br>✅ Party chat with proof cards<br>✅ Vote to revoke suspect completions</div>
+      </div>
+      <button class="ob-next-btn" onclick="obFinish()">Start adventuring 🚀</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:2rem">
+      <div class="ob-dot active" id="ob-dot-1"></div>
+      <div class="ob-dot" id="ob-dot-2"></div>
+      <div class="ob-dot" id="ob-dot-3"></div>
+      <div class="ob-dot" id="ob-dot-4"></div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
