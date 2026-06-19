@@ -1635,7 +1635,6 @@
   <div class="nav-links" id="nav-links">
     <a href="#quests" onclick="closeMenu()">Quests</a>
     <a href="#social" onclick="closeMenu()">Leaderboard</a>
-    <a href="#vibe" onclick="closeMenu()">Activity</a>
     <a href="#" onclick="closeMenu(); openPartyPage(); return false;" id="nav-party-link" style="display:none;">🎉 Party</a>
     <div class="notif-bell-wrap" id="notif-bell-wrap" style="display:none;" onclick="toggleNotifPanel()">
       <span style="font-size:18px;" title="Notifications">🔔</span>
@@ -1982,6 +1981,7 @@
 </div>
 
 <script>
+// ── PROOF METADATA ─────────────────────────────────
 // ── PROOF METADATA ────────────────────────────────────────────────────────────
 function extractExifDate(file, callback) {
   // Read first 128KB of file to find EXIF
@@ -2385,7 +2385,208 @@ const QUEST_POOL = [
   {icon:"💌",name:"Tell Someone What They Mean to You",desc:"Tell a friend, family member, or colleague exactly why you value them. In person or handwritten only.",pts:20,diff:"medium",type:"Kindness",collab:false},
   {icon:"🧹",name:"Do a Chore Without Being Asked",desc:"Take on a task for someone before they ask. Don't mention it afterward.",pts:15,diff:"easy",type:"Kindness",collab:false},
   {icon:"☕",name:"Buy a Stranger's Coffee",desc:"Pay for the order of the person behind you in line. Walk away before they can thank you.",pts:15,diff:"easy",type:"Kindness",collab:false},
-  {icon:"📞",name:"Call Someone You've Lost Touch With",desc:"Someone you haven't spoken to in over a year. Actually call them. No text.",pts:20,diff:"medium",type:"Kindness",collab:false}
+  {icon:"📞",name:"Call Someone You've Lost Touch With",desc:"Someone you haven't spoken to in over a year. Actually call them. No text.",pts:20,diff:"medium",type:"Kindness",collab:false},
+  // ══ SPORT ══
+  {icon:"🏈",name:"Throw a Perfect Spiral",desc:"Find a football and throw a perfect spiral at least 20 yards. Get someone to confirm it was clean.",pts:15,diff:"easy",type:"Sport",collab:true},
+  {icon:"⛹️",name:"Make 10 Three-Pointers",desc:"Hit 10 three-pointers in a single session at a basketball court. Track every make.",pts:25,diff:"medium",type:"Sport",collab:false},
+  {icon:"🎯",name:"Bullseye Challenge",desc:"Hit the bullseye at an archery range or axe-throwing venue. One shot counts.",pts:25,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏓",name:"Ping Pong to 21",desc:"Play a full game of ping pong to 21 points. Win or lose, finish the game.",pts:10,diff:"easy",type:"Sport",collab:true},
+  {icon:"🤸",name:"10 Backflips or Cartwheels",desc:"Do 10 consecutive cartwheels or — if you can — backflips. On grass counts.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🧗",name:"Complete a Bouldering Route",desc:"Find an indoor climbing gym and complete a beginner bouldering route without falling.",pts:30,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏊",name:"Hold Your Breath Underwater 45 Seconds",desc:"In a pool, hold your breath underwater for 45 consecutive seconds. No cheating.",pts:20,diff:"medium",type:"Sport",collab:true},
+  {icon:"⚾",name:"Hit 5 Pitches in a Row",desc:"At a batting cage or with a pitching machine, make contact with 5 consecutive pitches.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏇",name:"Learn One New Sport Move",desc:"Look up a skill in any sport you play — a new serve, shot, or trick — and practice it for 30 mins.",pts:15,diff:"easy",type:"Sport",collab:false},
+  {icon:"🎿",name:"Go Skiing or Snowboarding",desc:"Hit an actual slope. Complete at least 5 full runs top to bottom.",pts:45,diff:"hard",type:"Sport",collab:true},
+
+  // ══ NATURE ══
+  {icon:"🌙",name:"Night Walk",desc:"Go for a walk alone after 10pm. No destination. Just walk in the dark for 20 minutes.",pts:15,diff:"easy",type:"Nature",collab:false},
+  {icon:"🐠",name:"Snorkel or Freedive",desc:"Go snorkeling in the ocean, a lake, or a quarry. Stay under for at least one full minute.",pts:30,diff:"medium",type:"Nature",collab:true},
+  {icon:"🌧️",name:"Walk in the Rain",desc:"Go for a 20-minute walk in real rain without an umbrella. Not a drizzle.",pts:15,diff:"easy",type:"Nature",collab:false},
+  {icon:"🌊",name:"Wade Into the Ocean",desc:"Walk into the ocean until you're waist deep. No wetsuit. Stay in for 3 minutes.",pts:20,diff:"medium",type:"Nature",collab:false},
+  {icon:"🦊",name:"Spot Wildlife at Dawn",desc:"Wake before sunrise and go somewhere wild. Spot at least one animal in its natural habitat.",pts:25,diff:"medium",type:"Nature",collab:true},
+  {icon:"🌿",name:"Identify 10 Plants",desc:"Walk outside and identify 10 different plant species using an app. Write them down.",pts:15,diff:"easy",type:"Nature",collab:false},
+  {icon:"🏞️",name:"Find a Waterfall",desc:"Locate and visit a real waterfall. Stand close enough to get mist on your face.",pts:30,diff:"medium",type:"Nature",collab:true},
+  {icon:"🌁",name:"Hike in Fog",desc:"Find a trail and hike it in thick fog or low cloud. Minimum 30 minutes.",pts:20,diff:"easy",type:"Nature",collab:true},
+  {icon:"🍃",name:"Sit Outside for 1 Hour With No Phone",desc:"Find a spot in nature. Sit. No screen. No music. Just the outdoors for 60 minutes.",pts:20,diff:"medium",type:"Nature",collab:false},
+  {icon:"🌋",name:"Find the Highest Natural Point Near You",desc:"Research and hike to the highest natural point within 20 miles of where you are.",pts:35,diff:"medium",type:"Nature",collab:true},
+
+  // ══ URBAN ══
+  {icon:"🍕",name:"Find the Best Slice in Town",desc:"Visit at least 3 different pizza places and rank them. Document each slice.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"☕",name:"Try 3 Coffee Shops in One Day",desc:"Visit 3 different independent coffee shops. Order something different at each one.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🎭",name:"Watch a Street Performer",desc:"Find a street performer and stay for their full set. Tip them. Tell them they were great.",pts:10,diff:"easy",type:"Urban",collab:true},
+  {icon:"🗿",name:"Find a Local Monument You've Never Noticed",desc:"Find a statue, plaque, or monument in your city you've walked past but never read. Read it all.",pts:10,diff:"easy",type:"Urban",collab:false},
+  {icon:"🌆",name:"Watch the City at Night From a High Point",desc:"Find a rooftop, hill, or balcony with a city view. Stay until at least midnight.",pts:20,diff:"medium",type:"Urban",collab:true},
+  {icon:"🎵",name:"Find Live Music Without Planning It",desc:"Walk around until you find somewhere with live music happening. Go inside. Stay 30 minutes.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🏛️",name:"Visit a Museum You've Never Been To",desc:"Go to any museum in your city for the first time. Spend at least 1 hour.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🚶",name:"Walk Your Entire Neighborhood",desc:"Walk every street in your immediate neighborhood without repeating a road.",pts:20,diff:"medium",type:"Urban",collab:false},
+  {icon:"🎪",name:"Attend a Local Event",desc:"Find a local event — market, festival, meetup — that you'd never normally go to. Stay 1 hour.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🌃",name:"Eat Somewhere Open After 1am",desc:"Find a diner, food truck, or restaurant that serves real food after 1am. Eat a full meal.",pts:20,diff:"easy",type:"Urban",collab:true},
+  {icon:"🏊",name:"Find a Public Pool",desc:"Locate a public swimming pool in your city, pay the entry fee, and swim for 30 minutes.",pts:15,diff:"easy",type:"Urban",collab:false},
+  {icon:"🚌",name:"Ride to the End of a Bus Route",desc:"Get on a bus and ride it all the way to the final stop. Walk around for 10 minutes before coming back.",pts:15,diff:"easy",type:"Urban",collab:false},
+
+  // ══ FOOD ══
+  {icon:"🍳",name:"Cook a Full Three-Course Meal",desc:"Make a starter, main, and dessert from scratch. No shortcuts, no delivery, no frozen.",pts:30,diff:"medium",type:"Food",collab:true},
+  {icon:"🥘",name:"Cook a Dish From a Country You've Never Eaten From",desc:"Pick a cuisine you've never tried cooking. Make a full dish from scratch using a real recipe.",pts:25,diff:"medium",type:"Food",collab:true},
+  {icon:"🌶️",name:"Eat the Spiciest Thing on the Menu",desc:"At any restaurant, order the spiciest item available. Finish it without dairy relief.",pts:25,diff:"medium",type:"Food",collab:false},
+  {icon:"🧁",name:"Bake From Scratch Without a Recipe",desc:"Bake something completely from memory or improvisation. No looking anything up.",pts:25,diff:"medium",type:"Food",collab:false},
+  {icon:"🥗",name:"Eat Only Whole Foods for a Full Day",desc:"Go 24 hours eating nothing processed. Only real, whole ingredients. No cheating.",pts:20,diff:"medium",type:"Food",collab:false},
+  {icon:"🍣",name:"Try 5 Things You've Never Eaten",desc:"In one day eat 5 foods you have genuinely never tried before. At least 2 should be from scratch.",pts:20,diff:"medium",type:"Food",collab:true},
+  {icon:"🍩",name:"Find the Best Donut in Your City",desc:"Visit at least 3 different donut spots and find the best one. Rank them properly.",pts:15,diff:"easy",type:"Food",collab:true},
+  {icon:"🥩",name:"Grill Something You've Never Grilled Before",desc:"Fire up a grill and cook a protein you've never grilled before. Nail the temp.",pts:20,diff:"medium",type:"Food",collab:true},
+  {icon:"🫙",name:"Make Something Fermented",desc:"Make kimchi, kombucha, yogurt, or any fermented food. Wait at least 24 hours before eating.",pts:30,diff:"hard",type:"Food",collab:false},
+  {icon:"🍱",name:"Meal Prep for the Whole Week",desc:"Cook and portion every meal for 5 days in one session. No buying lunch all week.",pts:25,diff:"medium",type:"Food",collab:false},
+
+  // ══ SOCIAL ══
+  {icon:"🎤",name:"Do Karaoke Sober",desc:"Sing at a karaoke bar or machine completely sober. A full song, all the way through.",pts:25,diff:"medium",type:"Social",collab:false},
+  {icon:"🤝",name:"Have a Real Conversation With a Stranger",desc:"Start a genuine conversation with someone you've never met. Talk for at least 10 minutes.",pts:20,diff:"medium",type:"Social",collab:false},
+  {icon:"🎲",name:"Host a Game Night",desc:"Invite at least 3 people over and run a full game night. Minimum 3 different games.",pts:25,diff:"medium",type:"Social",collab:true},
+  {icon:"🎉",name:"Plan and Execute a Surprise for Someone",desc:"Organize a genuine surprise for someone — party, visit, gift, anything. Execute it perfectly.",pts:30,diff:"medium",type:"Social",collab:true},
+  {icon:"📸",name:"Take a Photo With 5 Strangers",desc:"Ask 5 different strangers if you can take a photo together. All 5 must say yes.",pts:20,diff:"medium",type:"Social",collab:false},
+  {icon:"🕺",name:"Dance in Public",desc:"Dance in a public space where you weren't expected to. Not at a club — somewhere random.",pts:20,diff:"medium",type:"Social",collab:false},
+  {icon:"🗣️",name:"Give a Toast or Speech",desc:"Stand up and give a genuine toast or speech at any gathering. At least 1 minute long.",pts:20,diff:"medium",type:"Social",collab:true},
+  {icon:"🎯",name:"Join a Club or Group Activity",desc:"Sign up for and attend a club, class, or group activity you've never done before.",pts:25,diff:"medium",type:"Social",collab:false},
+  {icon:"🎭",name:"Do Improv or Stand-Up",desc:"Sign up for an open mic, improv night, or comedy show. Perform in front of real people.",pts:45,diff:"hard",type:"Social",collab:false},
+  {icon:"💬",name:"Reconnect With an Old Group",desc:"Organize a hangout with a group of people you haven't all been together with in over a year.",pts:25,diff:"medium",type:"Social",collab:true},
+
+  // ══ KINDNESS ══
+  {icon:"🌻",name:"Leave an Anonymous Compliment",desc:"Leave a handwritten note complimenting a stranger somewhere they'll find it. Don't watch them read it.",pts:10,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🛒",name:"Help Someone With Their Groceries",desc:"Help someone carry groceries or bags without being asked. Don't expect thanks.",pts:10,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🩸",name:"Donate Blood",desc:"Find a local blood donation center and donate. Book the appointment and show up.",pts:35,diff:"medium",type:"Kindness",collab:false},
+  {icon:"🦮",name:"Volunteer for 2 Hours",desc:"Volunteer at any local organization — shelter, food bank, cleanup crew, whatever needs people.",pts:35,diff:"medium",type:"Kindness",collab:true},
+  {icon:"📖",name:"Read to Someone",desc:"Read a book, article, or story out loud to someone — a child, elderly neighbor, anyone.",pts:15,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🧦",name:"Donate a Bag of Clothes",desc:"Go through your wardrobe and donate a full bag of clothes to a shelter or donation center.",pts:20,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🌹",name:"Give Someone Flowers for No Reason",desc:"Buy flowers and give them to someone who has no idea why you're doing it.",pts:15,diff:"easy",type:"Kindness",collab:false},
+
+  // ══ THRILL ══
+  {icon:"🪂",name:"Go Skydiving",desc:"Do a tandem skydive from at least 10,000 feet. Film the jump.",pts:100,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🏎️",name:"Drive on a Track",desc:"Take a car — yours or rented — around a proper racing circuit. At least 5 laps.",pts:60,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🎢",name:"Ride the Scariest Coaster at a Park",desc:"Go to an amusement park and ride the most extreme coaster there. Front row if possible.",pts:25,diff:"medium",type:"Thrill",collab:true},
+  {icon:"🧗",name:"Free Solo a Small Climb",desc:"Find a small rock face or boulder and climb it without ropes. Must be safe but exposed.",pts:45,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🤿",name:"Night Swim in Open Water",desc:"Swim in a lake, river, or ocean after dark. Minimum 10 minutes in the water.",pts:40,diff:"hard",type:"Thrill",collab:true},
+  {icon:"🛺",name:"Ride Something You've Never Ridden",desc:"Get on a vehicle you've never operated — motorcycle, moped, horse, jet ski, anything.",pts:30,diff:"medium",type:"Thrill",collab:false},
+  {icon:"🌁",name:"Jump Off Something High Into Water",desc:"Find a legal cliff jump, bridge, or platform and jump. Minimum 5 meters.",pts:35,diff:"medium",type:"Thrill",collab:true},
+  {icon:"❄️",name:"Cold Water Challenge",desc:"Submerge fully in water under 15°C — ocean, lake, or ice bath. Stay in for 2 minutes.",pts:30,diff:"medium",type:"Thrill",collab:false},
+  {icon:"🚵",name:"Downhill Mountain Bike",desc:"Find a proper downhill trail and ride it. No stopping. Film the descent.",pts:45,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🪝",name:"Go Deep Sea or Fly Fishing",desc:"Book a deep sea fishing trip or find a serious river. Catch at least one fish.",pts:35,diff:"medium",type:"Thrill",collab:true},
+
+  // ══ CULTURE ══
+  {icon:"🎨",name:"Attend an Art Opening",desc:"Go to a gallery opening or art show. Talk to at least one artist about their work.",pts:15,diff:"easy",type:"Culture",collab:true},
+  {icon:"🎻",name:"Attend a Classical Concert",desc:"Go to a live orchestral, chamber, or classical music performance. Stay for the full show.",pts:20,diff:"easy",type:"Culture",collab:true},
+  {icon:"📖",name:"Read a Book in a Day",desc:"Start and finish a full book in one sitting or one calendar day. No skimming.",pts:30,diff:"medium",type:"Culture",collab:false},
+  {icon:"🎬",name:"Watch a Foreign Language Film",desc:"Watch a film in a language you don't speak — subtitles only, no dubbing. Write one sentence about it.",pts:10,diff:"easy",type:"Culture",collab:false},
+  {icon:"🖼️",name:"Recreate a Famous Painting",desc:"Pick any famous painting and recreate it in any medium — watercolor, pencil, crayon, anything.",pts:30,diff:"medium",type:"Culture",collab:false},
+  {icon:"🎭",name:"See Live Theatre",desc:"Attend a live play, musical, or theatrical performance. Not a concert. Actual theatre.",pts:20,diff:"easy",type:"Culture",collab:true},
+  {icon:"📜",name:"Learn 20 Words in a New Language",desc:"Pick a language you don't speak and learn 20 words. Test yourself at the end.",pts:15,diff:"easy",type:"Culture",collab:false},
+  {icon:"🎤",name:"Memorize and Perform a Poem",desc:"Memorize a full poem — at least 12 lines — and recite it perfectly from memory to someone.",pts:20,diff:"medium",type:"Culture",collab:false},
+  {icon:"🏺",name:"Take a Pottery or Art Class",desc:"Sign up for and attend one pottery, painting, or drawing class. Make something with your hands.",pts:25,diff:"easy",type:"Culture",collab:true},
+  {icon:"📰",name:"Read a Physical Newspaper Cover to Cover",desc:"Buy a physical newspaper and read every section. Every single one.",pts:15,diff:"easy",type:"Culture",collab:false},
+  {icon:"🎼",name:"Learn to Play One Song",desc:"On any instrument, learn to play one recognizable song all the way through. Perform it for someone.",pts:35,diff:"hard",type:"Culture",collab:false},
+  {icon:"🗿",name:"Visit a Historical Site",desc:"Go to a historical landmark or site near you that you've never visited. Read everything there.",pts:15,diff:"easy",type:"Culture",collab:true},,
+  // ── URBAN (15 new) ──────────────────────────────────────────────────────────
+  {icon:"🏙️",name:"Visit 3 Coffee Shops in One Morning",desc:"Hit 3 different independent coffee shops before noon. Order something at each. No chains.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🌆",name:"Rooftop Sunset",desc:"Find a rooftop bar, building, or parking garage and watch the sun go down from above.",pts:20,diff:"easy",type:"Urban",collab:true},
+  {icon:"🚶",name:"Walk Your Whole City Block",desc:"Walk the full perimeter of the block you live or work on. Every side. No shortcuts.",pts:10,diff:"easy",type:"Urban",collab:false},
+  {icon:"🗣️",name:"Talk to a Local Business Owner",desc:"Walk into a small local shop and have a genuine conversation with the owner about their story.",pts:15,diff:"easy",type:"Urban",collab:false},
+  {icon:"📰",name:"Read a Physical Newspaper",desc:"Buy a print newspaper from a newsstand or store. Read at least 3 full articles.",pts:10,diff:"easy",type:"Urban",collab:false},
+  {icon:"🎭",name:"Catch Live Street Performance",desc:"Find a busker or street performer and stay for their full set — at least 10 minutes.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🏛️",name:"Visit a Government Building",desc:"Go inside a city hall, courthouse, or public library. Find out what one thing it's known for.",pts:10,diff:"easy",type:"Urban",collab:true},
+  {icon:"🌃",name:"Walk the City After Midnight",desc:"Take a walk through your city after midnight. Stay safe, cover at least 1 mile.",pts:25,diff:"medium",type:"Urban",collab:true},
+  {icon:"🚲",name:"Rent a City Bike",desc:"Use a bikeshare or rental and ride through a neighborhood you wouldn't normally walk.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🏪",name:"Shop Only Local for a Day",desc:"Buy everything you need today from local independent shops. No chains, no Amazon.",pts:20,diff:"medium",type:"Urban",collab:false},
+  {icon:"🎪",name:"Find a Farmers Market",desc:"Visit a farmers market. Buy something from at least 3 different vendors.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🗺️",name:"Get Lost on Purpose",desc:"Put your phone away and explore a neighborhood without GPS for 30 minutes.",pts:20,diff:"medium",type:"Urban",collab:false},
+  {icon:"🌉",name:"Cross Every Bridge in Your City",desc:"Find and cross every bridge in your city on foot in one day.",pts:35,diff:"hard",type:"Urban",collab:true},
+  {icon:"🎨",name:"Find 5 Pieces of Street Art",desc:"Hunt down 5 different murals or pieces of street art. Photograph each one.",pts:15,diff:"easy",type:"Urban",collab:true},
+  {icon:"🚇",name:"Ride Transit to a Random Stop",desc:"Get on a bus or train, pick a random stop you've never been to, explore it for an hour.",pts:20,diff:"medium",type:"Urban",collab:false},
+
+  // ── FOOD (20 new) ──────────────────────────────────────────────────────────
+  {icon:"🍳",name:"Cook a Full Meal from Scratch",desc:"Cook a complete meal with at least 3 components entirely from scratch. No shortcuts.",pts:20,diff:"medium",type:"Food",collab:true},
+  {icon:"🌮",name:"Eat at a Restaurant You've Never Heard Of",desc:"Pick a restaurant with under 100 reviews and eat there. Order something you can't pronounce.",pts:15,diff:"easy",type:"Food",collab:true},
+  {icon:"🍕",name:"Make Homemade Pizza",desc:"Make pizza dough from scratch, add toppings, bake it. No store-bought dough.",pts:25,diff:"medium",type:"Food",collab:true},
+  {icon:"☕",name:"Make a Pour-Over or French Press",desc:"Make a proper pour-over, French press, or cold brew at home. No pod machines.",pts:10,diff:"easy",type:"Food",collab:false},
+  {icon:"🧁",name:"Bake Something You've Never Made",desc:"Bake a recipe you have never attempted before. It must involve the oven.",pts:20,diff:"medium",type:"Food",collab:false},
+  {icon:"🥗",name:"Eat Only Whole Foods for a Day",desc:"No processed food, no fast food, no packaged snacks for one full day. Real ingredients only.",pts:25,diff:"medium",type:"Food",collab:false},
+  {icon:"🍣",name:"Try a Food You've Always Avoided",desc:"Order and finish something you've always refused to eat. Give it a real shot.",pts:15,diff:"easy",type:"Food",collab:false},
+  {icon:"🌶️",name:"Eat the Spiciest Thing on the Menu",desc:"Order the hottest item at any restaurant and finish the whole thing.",pts:25,diff:"medium",type:"Food",collab:true},
+  {icon:"🥩",name:"Cook Steak to Perfect Medium-Rare",desc:"Cook a steak at home to medium-rare. No checking YouTube while it's on the pan.",pts:20,diff:"medium",type:"Food",collab:false},
+  {icon:"🍜",name:"Try 3 Different Cuisines in One Day",desc:"Eat three different cultural cuisines in a single day. Breakfast, lunch, dinner.",pts:25,diff:"medium",type:"Food",collab:true},
+  {icon:"🥐",name:"Visit a Bakery at Opening Time",desc:"Be at a bakery when it opens — before 8am. Buy something fresh out of the oven.",pts:15,diff:"easy",type:"Food",collab:true},
+  {icon:"🍦",name:"Find the Best Ice Cream in Town",desc:"Visit at least 3 ice cream spots and definitively rank them. Document your research.",pts:15,diff:"easy",type:"Food",collab:true},
+  {icon:"🎂",name:"Make a Birthday Cake for No Reason",desc:"Bake a full layered cake on a random day. Give it to someone. No occasion needed.",pts:25,diff:"medium",type:"Food",collab:false},
+  {icon:"🥘",name:"Cook a Recipe from Another Country",desc:"Pick a traditional dish from a country you've never visited and cook it authentically.",pts:25,diff:"medium",type:"Food",collab:true},
+  {icon:"🧇",name:"Make Breakfast for Someone Else",desc:"Wake up and make a full cooked breakfast for another person before they ask.",pts:15,diff:"easy",type:"Food",collab:false},
+  {icon:"🍺",name:"Try 5 Local Craft Beers",desc:"Visit a craft brewery or bar and try 5 beers you've never had. Pick a favorite.",pts:20,diff:"easy",type:"Food",collab:true},
+  {icon:"🥟",name:"Make Dumplings from Scratch",desc:"Make dumplings or ravioli entirely from scratch — filling, dough, fold, cook.",pts:35,diff:"hard",type:"Food",collab:true},
+  {icon:"🌯",name:"Eat Street Food for Every Meal",desc:"Eat every meal of the day exclusively from street food or food carts.",pts:20,diff:"medium",type:"Food",collab:true},
+  {icon:"🥦",name:"Cook a Meal Using Only What's in Your Fridge",desc:"No grocery run — cook a complete meal using only ingredients already in your home.",pts:20,diff:"medium",type:"Food",collab:false},
+  {icon:"🍫",name:"Make Chocolate from Scratch",desc:"Melt, temper, and mold real chocolate from cacao or chocolate bars into something new.",pts:30,diff:"hard",type:"Food",collab:true},
+
+  // ── SPORT (10 new) ──────────────────────────────────────────────────────────
+  {icon:"🏈",name:"Throw a Perfect Spiral",desc:"Throw a football 30 yards in a perfect spiral. Someone has to catch it clean.",pts:15,diff:"easy",type:"Sport",collab:true},
+  {icon:"⛳",name:"Get a Par or Better",desc:"Play a full hole of golf and finish at par or under. No mulligans.",pts:25,diff:"medium",type:"Sport",collab:false},
+  {icon:"🎳",name:"Bowl Over 150",desc:"Bowl a game of 10-pin bowling and score 150 or higher.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏓",name:"Win a Ping Pong Match",desc:"Play a full table tennis match to 11 and win. No let serves allowed.",pts:15,diff:"easy",type:"Sport",collab:true},
+  {icon:"🤸",name:"Do 10 Burpees Under 60 Seconds",desc:"Complete 10 full burpees in under 60 seconds. Full pushup and jump count.",pts:15,diff:"easy",type:"Sport",collab:false},
+  {icon:"🧗",name:"Climb a Bouldering Wall",desc:"Complete a bouldering problem at a climbing gym. V0 or above — has to be a real route.",pts:25,diff:"medium",type:"Sport",collab:false},
+  {icon:"🎯",name:"Hit Bullseye 3 Times",desc:"At an archery range or dart board, hit the bullseye 3 times in one session.",pts:20,diff:"medium",type:"Sport",collab:false},
+  {icon:"🏊",name:"Complete a Triathlon Sprint",desc:"Swim 750m, bike 20km, run 5km. Any order. Track and document each leg.",pts:75,diff:"hard",type:"Sport",collab:false},
+  {icon:"⚽",name:"Score a Hat-Trick",desc:"Score 3 goals in a single soccer match or kickaround session.",pts:35,diff:"hard",type:"Sport",collab:true},
+  {icon:"🏋️",name:"Max Out Your Bench Press",desc:"Find your 1-rep max on bench press at a gym. Have a spotter. Log the weight.",pts:25,diff:"medium",type:"Sport",collab:false},
+
+  // ── NATURE (10 new) ─────────────────────────────────────────────────────────
+  {icon:"🌙",name:"Stargaze for an Hour",desc:"Drive away from city lights and look at stars for one full hour. No phone screen.",pts:20,diff:"easy",type:"Nature",collab:true},
+  {icon:"🌊",name:"Swim at Dawn",desc:"Get in open water before 7am. Ocean, lake, or river. Stay in for at least 5 minutes.",pts:25,diff:"medium",type:"Nature",collab:false},
+  {icon:"🌿",name:"Identify 10 Plant Species",desc:"On a walk, identify 10 different plant species using an app or book.",pts:15,diff:"easy",type:"Nature",collab:true},
+  {icon:"🦊",name:"Spot a Wild Animal",desc:"See a wild animal in its natural habitat — not a pet, not a zoo. Get a photo.",pts:20,diff:"medium",type:"Nature",collab:true},
+  {icon:"🏕️",name:"Build a Campfire from Scratch",desc:"Start a campfire using only natural materials. No lighter fluid. Must sustain for 20 minutes.",pts:30,diff:"medium",type:"Nature",collab:true},
+  {icon:"🌧️",name:"Walk in the Rain Without Umbrella",desc:"Take a 20-minute walk in the rain with no umbrella or hood. Actually enjoy it.",pts:15,diff:"easy",type:"Nature",collab:false},
+  {icon:"🍃",name:"Spend 2 Hours in Complete Silence Outside",desc:"Go somewhere natural and stay in complete silence for 2 hours. No music, no calls.",pts:25,diff:"medium",type:"Nature",collab:false},
+  {icon:"🌋",name:"Visit a Geological Formation",desc:"Find a cave, cliff face, waterfall, canyon, or natural rock formation and explore it.",pts:30,diff:"medium",type:"Nature",collab:true},
+  {icon:"🌱",name:"Plant Something",desc:"Plant a seed, bulb, or seedling and document it. Has to go in actual soil.",pts:10,diff:"easy",type:"Nature",collab:false},
+  {icon:"🔦",name:"Night Hike",desc:"Hike at least 2 miles in the dark. Headlamp is fine. Trail must actually be dark.",pts:35,diff:"hard",type:"Nature",collab:true},
+
+  // ── SOCIAL (10 new) ─────────────────────────────────────────────────────────
+  {icon:"🎤",name:"Do Karaoke",desc:"Sing at least one full song at a karaoke bar or private room. No whispering.",pts:20,diff:"easy",type:"Social",collab:true},
+  {icon:"🃏",name:"Host a Game Night",desc:"Organize and host a game night with at least 4 people. You supply the games and snacks.",pts:25,diff:"medium",type:"Social",collab:true},
+  {icon:"👋",name:"Introduce Yourself to a Neighbor",desc:"Knock on a neighbor's door and properly introduce yourself. Have an actual conversation.",pts:15,diff:"easy",type:"Social",collab:false},
+  {icon:"🎲",name:"Join a Pickup Game",desc:"Find a pickup basketball, soccer, or volleyball game and ask to join strangers.",pts:20,diff:"medium",type:"Social",collab:false},
+  {icon:"🤝",name:"Attend a Networking Event",desc:"Go to a professional or community networking event. Get at least 3 people's contact info.",pts:25,diff:"medium",type:"Social",collab:false},
+  {icon:"🎉",name:"Plan a Surprise for Someone",desc:"Plan and execute a surprise for a friend — could be anything. It has to be genuinely unexpected.",pts:25,diff:"medium",type:"Social",collab:false},
+  {icon:"📷",name:"Be a Tourist in Your Own City",desc:"Spend a day doing things tourists do in your city. Visit at least 3 landmarks.",pts:20,diff:"easy",type:"Social",collab:true},
+  {icon:"🍻",name:"Go to a Bar Alone",desc:"Go to a bar solo and have a conversation with at least one stranger. No texting people.",pts:20,diff:"medium",type:"Social",collab:false},
+  {icon:"🎳",name:"Join a Recreational League",desc:"Sign up for any recreational sports or activity league. Show up to the first session.",pts:25,diff:"medium",type:"Social",collab:false},
+  {icon:"🎭",name:"Attend a Live Show",desc:"Go to any live performance — comedy, theatre, music, improv. Stay for the whole thing.",pts:20,diff:"easy",type:"Social",collab:true},
+
+  // ── THRILL (10 new) ─────────────────────────────────────────────────────────
+  {icon:"🪂",name:"Go Skydiving",desc:"Jump out of a plane. Tandem counts. Land in one piece.",pts:100,diff:"hard",type:"Thrill",collab:true},
+  {icon:"🎢",name:"Ride the Biggest Rollercoaster Nearby",desc:"Find the tallest or fastest rollercoaster within 2 hours of you and ride it front row.",pts:25,diff:"medium",type:"Thrill",collab:true},
+  {icon:"🏊",name:"Jump Off a Cliff into Water",desc:"Find a safe cliff jump spot and do it. Minimum 4 meters. No backing out at the edge.",pts:35,diff:"hard",type:"Thrill",collab:true},
+  {icon:"🌊",name:"Bodysurf a Wave",desc:"Catch and ride a wave using only your body — no board. Stay up until the wave dies.",pts:25,diff:"medium",type:"Thrill",collab:false},
+  {icon:"🎯",name:"Axe Throwing",desc:"Go to an axe throwing venue. Stick the bullseye at least once.",pts:20,diff:"easy",type:"Thrill",collab:true},
+  {icon:"🏎️",name:"Go-Kart Race",desc:"Race go-karts against at least 3 other people. Finish on the podium.",pts:20,diff:"easy",type:"Thrill",collab:true},
+  {icon:"🧗",name:"Free Solo a Boulder",desc:"Climb a natural or gym boulder without any rope or harness. Minimum 5 meters.",pts:45,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🚵",name:"Black Diamond Trail",desc:"Complete a black diamond mountain bike or ski trail. No walking the technical sections.",pts:50,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🏄",name:"Kitesurf or Windsurf",desc:"Get on a kiteboard or windsurf board and stay up for at least 30 seconds.",pts:45,diff:"hard",type:"Thrill",collab:false},
+  {icon:"🎪",name:"Eat a Live Insect",desc:"Eat a whole live or dried insect. Not a hidden ingredient — you have to see it.",pts:30,diff:"medium",type:"Thrill",collab:true},
+
+  // ── CULTURE (10 new) ────────────────────────────────────────────────────────
+  {icon:"🎨",name:"Take an Art Class",desc:"Attend a painting, pottery, drawing, or sculpture class. Make something from start to finish.",pts:25,diff:"easy",type:"Culture",collab:true},
+  {icon:"📖",name:"Read a Book in One Day",desc:"Start and finish a book in a single calendar day. No novellas under 150 pages.",pts:35,diff:"hard",type:"Culture",collab:false},
+  {icon:"🎵",name:"Learn a Song on an Instrument",desc:"Learn to play a full song on any instrument from scratch. Record yourself playing it.",pts:35,diff:"hard",type:"Culture",collab:false},
+  {icon:"🎬",name:"Watch a Foreign Film",desc:"Watch a film in a language you don't speak with subtitles. No skipping. Write one sentence about it.",pts:15,diff:"easy",type:"Culture",collab:true},
+  {icon:"🏺",name:"Visit a Museum You've Never Been To",desc:"Go to any museum you have never visited. Spend at least 90 minutes there. No rushing.",pts:20,diff:"easy",type:"Culture",collab:true},
+  {icon:"✍️",name:"Write a Short Story",desc:"Write a piece of fiction of at least 500 words. Give it a beginning, middle, and end.",pts:25,diff:"medium",type:"Culture",collab:false},
+  {icon:"🎻",name:"Attend a Classical Music Concert",desc:"Go to a live classical, jazz, or orchestral performance. Dress appropriately.",pts:25,diff:"easy",type:"Culture",collab:true},
+  {icon:"🎭",name:"See a Play or Musical",desc:"Attend live theatre — any genre. Stay for the curtain call.",pts:20,diff:"easy",type:"Culture",collab:true},
+  {icon:"🗣️",name:"Learn 20 Words in a New Language",desc:"Learn and memorize 20 words in a language you don't know. Test yourself without looking.",pts:20,diff:"medium",type:"Culture",collab:false},
+  {icon:"🖼️",name:"Attend an Art Opening",desc:"Go to a gallery opening or art show. Talk to at least one artist about their work.",pts:20,diff:"easy",type:"Culture",collab:true},
+
+  // ── KINDNESS (5 new) ────────────────────────────────────────────────────────
+  {icon:"🌻",name:"Leave a Kind Note for a Stranger",desc:"Write a genuinely kind note and leave it somewhere a stranger will find it — bus, cafe, library.",pts:10,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🩸",name:"Donate Blood",desc:"Go to a blood donation center and donate. Bring ID. Eat beforehand.",pts:30,diff:"medium",type:"Kindness",collab:false},
+  {icon:"🎁",name:"Give a Gift for No Reason",desc:"Buy or make something for a friend with no occasion. Give it with no explanation needed.",pts:15,diff:"easy",type:"Kindness",collab:false},
+  {icon:"🤲",name:"Volunteer for 2 Hours",desc:"Show up and volunteer at any local organization for a minimum of 2 hours.",pts:30,diff:"medium",type:"Kindness",collab:true},
+  {icon:"🐾",name:"Help an Animal",desc:"Do something meaningful for an animal — foster, donate to a shelter, help a stray.",pts:20,diff:"easy",type:"Kindness",collab:false}
 ];
 
 // Filter out any malformed entries
@@ -3408,7 +3609,6 @@ document.addEventListener('click', function(e) {
 renderQuestsForLevel();
 renderLeaderboard();
 startCountdown();
-renderActivityFeed();
 updateHeroStats();
 // Capture party hash immediately before anything clears it
 var _capturedHash = window.location.hash || '';
@@ -4862,6 +5062,8 @@ function openPartyPage() {
   partyState = null;
   document.getElementById('party-page').style.display = 'block';
   document.body.style.overflow = 'hidden';
+  var bn2 = document.getElementById('bottom-nav');
+  if (bn2) { bn2.style.zIndex = '400'; }
   showCreateParty();
   populatePartyInviteChips();
 }
@@ -4869,6 +5071,8 @@ function openPartyPage() {
 function closePartyPage() {
   document.getElementById('party-page').style.display = 'none';
   document.body.style.overflow = '';
+  var bn = document.getElementById('bottom-nav');
+  if (bn) { bn.style.zIndex = '150'; }
   stopChatPoll();
   closeEmojiPicker();
 }
@@ -5328,8 +5532,7 @@ function updateNavButton(username) {
   if (profileBtn) profileBtn.style.display = '';
   if (label) label.textContent = '@' + username;
   if (partyLink) partyLink.style.display = '';
-  renderActivityFeed();
-  setTimeout(checkPendingNotifs, 500);
+    setTimeout(checkPendingNotifs, 500);
   updateBottomNav();
 }
 
@@ -7715,8 +7918,6 @@ function updateBottomNav() {
 }
 
 </script>
-
-<!-- FRIEND INVITE MODAL -->
 <div class="modal-overlay" id="friend-modal" style="display:none;align-items:center;justify-content:center;">
   <div class="modal" style="max-width:400px;">
     <button class="modal-close" onclick="closeFriendInvite()">✕</button>
@@ -8051,7 +8252,7 @@ function updateBottomNav() {
 
 
 <!-- PARTY PAGE -->
-<div id="party-page" style="display:none;">
+<div id="party-page" style="display:none;padding-bottom:calc(56px + env(safe-area-inset-bottom,0px));">
   <div class="party-page-header">
     <button onclick="closePartyPage()" style="background:none;border:none;color:var(--stone);font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;">← Back</button>
     <div id="party-header-title" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--cream);">🎉 PARTY</div>
