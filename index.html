@@ -1982,6 +1982,146 @@
 </div>
 
 <script>
+// ── PROOF METADATA ────────────────────────────────────────────────────────────
+function extractExifDate(file, callback) {
+  // Read first 128KB of file to find EXIF
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var buf = e.target.result;
+      var view = new DataView(buf);
+      // Check JPEG marker
+      if (view.getUint16(0) !== 0xFFD8) { callback(null); return; }
+      var offset = 2;
+      while (offset < buf.byteLength - 1) {
+        var marker = view.getUint16(offset);
+        if (marker === 0xFFE1) {
+          // APP1 - EXIF
+          var exifStr = String.fromCharCode.apply(null, new Uint8Array(buf, offset + 4, 6));
+          if (exifStr.indexOf('Exif') === 0) {
+            var tiffOffset = offset + 10;
+            var littleEndian = view.getUint16(tiffOffset) === 0x4949;
+            var ifdOffset = view.getUint32(tiffOffset + 4, littleEndian) + tiffOffset;
+            var entries = view.getUint16(ifdOffset, littleEndian);
+            for (var i = 0; i < entries; i++) {
+              var entryOffset = ifdOffset + 2 + i * 12;
+              var tag = view.getUint16(entryOffset, littleEndian);
+              if (tag === 0x9003 || tag === 0x0132) { // DateTimeOriginal or DateTime
+                var valOffset = tiffOffset + view.getUint32(entryOffset + 8, littleEndian);
+                var dateStr = '';
+                for (var j = 0; j < 19; j++) {
+                  dateStr += String.fromCharCode(view.getUint8(valOffset + j));
+                }
+                // Format: "2024:06:10 14:32:00"
+                var parts = dateStr.split(' ');
+                if (parts.length === 2) {
+                  var d = parts[0].replace(/:/g, '-') + 'T' + parts[1];
+                  callback(new Date(d).getTime());
+                  return;
+                }
+              }
+            }
+          }
+        }
+        if (marker === 0xFFDA) break;
+        var len = view.getUint16(offset + 2);
+        offset += 2 + len;
+      }
+      callback(null);
+    } catch(e) { callback(null); }
+  };
+  reader.readAsArrayBuffer(file.slice(0, 131072));
+}
+
+function getProofMetadata(quest, files, callback) {
+  var meta = {
+    timeTaken: null,
+    exifTime: null,
+    location: null,
+    device: getDeviceType(),
+    flagged: false,
+    flags: []
+  };
+
+  // Time taken since accept
+  if (quest.acceptedAt) {
+    meta.timeTaken = Math.round((Date.now() - quest.acceptedAt) / 1000); // seconds
+  }
+
+  // Minimum time check (flag if suspiciously fast)
+  var minTimes = { easy: 120, medium: 600, hard: 1800 }; // seconds
+  var minTime = minTimes[quest.diff] || 120;
+  if (meta.timeTaken !== null && meta.timeTaken < minTime) {
+    meta.flagged = true;
+    meta.flags.push('Completed unusually fast');
+  }
+
+  var pending = 2; // geo + exif
+  function done() {
+    pending--;
+    if (pending === 0) callback(meta);
+  }
+
+  // Get location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      meta.location = {
+        lat: pos.coords.latitude.toFixed(3),
+        lng: pos.coords.longitude.toFixed(3),
+        acc: Math.round(pos.coords.accuracy)
+      };
+      // Reverse geocode with free API
+      fetch('https://nominatim.openstreetmap.org/reverse?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&format=json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var addr = d.address || {};
+          meta.locationStr = (addr.city || addr.town || addr.village || addr.county || '') +
+            (addr.state ? ', ' + addr.state : '');
+          done();
+        })
+        .catch(function() { meta.locationStr = meta.location.lat + ', ' + meta.location.lng; done(); });
+    }, function() {
+      meta.locationStr = null;
+      done();
+    }, { timeout: 5000 });
+  } else {
+    meta.locationStr = null;
+    done();
+  }
+
+  // EXIF timestamp
+  if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+    extractExifDate(files[0], function(exifTs) {
+      meta.exifTime = exifTs;
+      // Flag if photo was taken before quest was accepted
+      if (exifTs && quest.acceptedAt && exifTs < quest.acceptedAt - 300000) {
+        meta.flagged = true;
+        meta.flags.push('Photo taken before quest was accepted');
+      }
+      done();
+    });
+  } else {
+    done();
+  }
+}
+
+function getDeviceType() {
+  var ua = navigator.userAgent || '';
+  if (/iPhone/.test(ua)) return 'iPhone';
+  if (/iPad/.test(ua)) return 'iPad';
+  if (/Android/.test(ua)) return 'Android';
+  if (/Mac/.test(ua)) return 'Mac';
+  if (/Windows/.test(ua)) return 'Windows';
+  return 'Unknown';
+}
+
+function formatTimeTaken(secs) {
+  if (!secs && secs !== 0) return '—';
+  if (secs < 60) return secs + 's';
+  if (secs < 3600) return Math.floor(secs/60) + 'm ' + (secs%60) + 's';
+  return Math.floor(secs/3600) + 'h ' + Math.floor((secs%3600)/60) + 'm';
+}
+
 // ── ONBOARDING ───────────────────────────────────────────────────────────────
 function showOnboarding() {
   var el = document.getElementById('onboarding-overlay');
@@ -3229,9 +3369,15 @@ async function submitCompletion() {
       // Post burn message
       var partyBurn = getPartyBurnMessage(currentUser.username, currentQuest, total, activeParty);
       postSystemMessage(partyBurn);
-      // Post proof card with image and voting
-      postProofCard(currentUser, currentQuest, total, proofFiles);
+      // Gather metadata then post proof card
+      var _capturedFiles = proofFiles.slice();
+      var _capturedQuest = Object.assign({}, currentQuest);
+      var _capturedUser = Object.assign({}, currentUser);
+      var _capturedTotal = total;
       partyState = oldPartyState;
+      getProofMetadata(_capturedQuest, _capturedFiles, function(meta) {
+        postProofCard(_capturedUser, _capturedQuest, _capturedTotal, _capturedFiles, meta);
+      });
     }
     if (extMult > 0) {
       pushNotif('⏱', 'Extension bonus applied!', '+' + extMult + '% added for your extended commitment. Respect.');
@@ -3453,14 +3599,18 @@ function renderQuestsForLevel() {
     const bMatch = (b.level === level || (!b.level && level === 'normal')) ? -1 : 0;
     return aMatch - bMatch;
   });
-  renderQuestsFromPool(pool, currentFilter || 'all');
+  renderQuestsFromPool(pool, currentFilter || 'all'); // cat filter applied inside renderQuestsFromPool
 }
 
 function renderQuestsFromPool(pool, filter) {
   const grid = document.getElementById('quests-grid');
   grid.innerHTML = '';
   const level = currentUser ? (currentUser.level || 'normal') : 'normal';
-  const filtered = filter === 'all' ? pool : pool.filter(q => q.diff === filter);
+  const filtered = pool.filter(function(q) {
+    var diffOk = (!filter || filter === 'all') || q.diff === filter;
+    var catOk  = (!currentCatFilter || currentCatFilter === 'all') || q.type === currentCatFilter;
+    return diffOk && catOk;
+  });
   filtered.forEach((q, i) => {
     const card = document.createElement('div');
     const isActive = activeQuests.some(a => a.id === q.id);
@@ -5007,7 +5157,10 @@ function triggerPartyEnd() {
   }).sort(function(a,b) { return b.earned - a.earned; });
 
   var winner = ranked[0];
-  pushNotif('🏆', winner.username + ' won the party!', 'Spin the wheel to see what the others have to do.');
+  pushNotif('🏆', winner.username + ' won the party!', 'Tap to spin the wheel.', function() {
+    buildWheelForParty(partyState);
+    document.getElementById('wheel-overlay').classList.add('open');
+  });
 
   // Only show wheel if current user is the creator or winner
   document.getElementById('wheel-winner-name').textContent = winner.username + ' WINS';
@@ -7100,13 +7253,11 @@ function updateVacationToggleUI(isActive) {
 
 // ── PARTY PROOF CARDS ─────────────────────────────────────────────────────────
 
-function postProofCard(user, quest, pts, files) {
-  if (!files || files.length === 0) return;
-  var file = files[0];
-  var isVideo = file.type.startsWith('video/');
+function postProofCard(user, quest, pts, files, meta) {
+  var isVideo = files && files.length > 0 && files[0].type.startsWith('video/');
+  meta = meta || {};
 
-  if (isVideo) {
-    // For video just post a card without image preview
+  function saveCard(imageData) {
     var msgs = loadChatMessages();
     msgs.push({
       id: Date.now(),
@@ -7116,40 +7267,32 @@ function postProofCard(user, quest, pts, files) {
       questName: quest.name,
       questIcon: quest.icon,
       pts: pts,
-      imageData: null,
-      isVideo: true,
+      imageData: imageData || null,
+      isVideo: isVideo,
       time: Date.now(),
       votes: { legit: [], sus: [] },
-      revoked: false
+      revoked: false,
+      meta: {
+        timeTaken: meta.timeTaken,
+        exifTime: meta.exifTime,
+        locationStr: meta.locationStr,
+        device: meta.device,
+        flagged: meta.flagged,
+        flags: meta.flags || []
+      }
     });
     saveChatMessages(msgs);
     renderChatMessages();
+  }
+
+  if (!files || files.length === 0 || isVideo) {
+    saveCard(null);
     return;
   }
 
-  // Read image as base64 for display in chat
   var reader = new FileReader();
-  reader.onload = function(e) {
-    var imageData = e.target.result;
-    var msgs = loadChatMessages();
-    msgs.push({
-      id: Date.now(),
-      type: 'proof',
-      sender: user.username,
-      senderEmail: user.email,
-      questName: quest.name,
-      questIcon: quest.icon,
-      pts: pts,
-      imageData: imageData,
-      isVideo: false,
-      time: Date.now(),
-      votes: { legit: [], sus: [] },
-      revoked: false
-    });
-    saveChatMessages(msgs);
-    renderChatMessages();
-  };
-  reader.readAsDataURL(file);
+  reader.onload = function(e) { saveCard(e.target.result); };
+  reader.readAsDataURL(files[0]);
 }
 
 function renderProofCardHTML(m) {
@@ -7167,11 +7310,35 @@ function renderProofCardHTML(m) {
   if (m.imageData) {
     imgHtml = '<img src="' + m.imageData + '" class="proof-card-img" alt="Quest proof">';
   } else if (m.isVideo) {
-    imgHtml = '<div style="background:rgba(17,18,20,0.8);padding:1.5rem;text-align:center;border-bottom:1px solid rgba(200,208,220,0.08);">' +
-      '<div style="font-size:36px;margin-bottom:6px;">🎬</div>' +
-      '<div style="font-size:12px;color:var(--stone);">Video proof submitted</div>' +
+    imgHtml = '<div style="background:rgba(17,18,20,0.8);padding:1.25rem;text-align:center;border-bottom:1px solid rgba(200,208,220,0.08);">' +
+      '<div style="font-size:28px;margin-bottom:4px;">🎬</div>' +
+      '<div style="font-size:11px;color:var(--stone);">Video proof submitted</div>' +
     '</div>';
   }
+
+  // Build metadata strip
+  var mt = m.meta || {};
+  var metaRows = [];
+  if (mt.locationStr) metaRows.push('📍 ' + mt.locationStr);
+  if (mt.timeTaken !== null && mt.timeTaken !== undefined) metaRows.push('⏱ ' + formatTimeTaken(mt.timeTaken) + ' to complete');
+  if (mt.exifTime) metaRows.push('📷 Photo taken ' + new Date(mt.exifTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+  if (mt.device) metaRows.push('📱 ' + mt.device);
+
+  var flagHtml = '';
+  if (mt.flagged && mt.flags && mt.flags.length > 0) {
+    flagHtml = '<div style="background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);border-radius:4px;padding:6px 8px;margin-bottom:8px;">' +
+      '<div style="font-size:10px;color:#e74c3c;font-weight:600;margin-bottom:2px;">⚠️ AUTO-FLAGGED</div>' +
+      mt.flags.map(function(f) { return '<div style="font-size:10px;color:#e57373;">• ' + f + '</div>'; }).join('') +
+    '</div>';
+  }
+
+  var metaHtml = metaRows.length > 0
+    ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">' +
+        metaRows.map(function(r) {
+          return '<span style="font-size:10px;color:var(--stone);background:rgba(200,208,220,0.06);padding:2px 6px;border-radius:3px;">' + r + '</span>';
+        }).join('') +
+      '</div>'
+    : '';
 
   var voteHtml = '';
   if (isRevoked) {
@@ -7190,8 +7357,10 @@ function renderProofCardHTML(m) {
   return '<div class="chat-msg system"><div class="proof-card">' +
     imgHtml +
     '<div class="proof-card-body">' +
+      flagHtml +
       '<div class="proof-card-quest">' + m.questIcon + ' ' + m.questName + '</div>' +
       '<div class="proof-card-meta">' + m.sender + ' · +' + m.pts + ' pts · ' + timeStr + '</div>' +
+      metaHtml +
       voteHtml +
     '</div>' +
   '</div></div>';
