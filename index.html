@@ -1400,230 +1400,207 @@
   /* ══════════════════════════════════════════════════════════════
      COMPREHENSIVE MOBILE FIX — max-width: 430px (iPhone)
   ══════════════════════════════════════════════════════════════ */
-  @media (max-width: 430px) {
-
-    /* Base */
-    html, body { font-size: 14px; }
-    * { -webkit-tap-highlight-color: transparent; }
-
-    /* Nav */
-    nav { padding: 0 1rem; height: 52px; }
-    .nav-logo { font-size: 18px; letter-spacing: 2px; }
-    .nav-links.open { top: 52px; padding: 1rem 1rem 1.5rem; gap: 1rem; }
-    .nav-links.open a { font-size: 16px; }
-
-    /* Hero */
-    #hero { padding: 52px 1rem 3rem; }
-    .hero-title { font-size: clamp(38px, 14vw, 52px); letter-spacing: 0px; }
-    .hero-sub { font-size: 14px; }
-    .hero-badge { font-size: 9px; padding: 4px 10px; }
-    .hero-stats { gap: 1rem; flex-wrap: wrap; }
-    .hero-stat .num { font-size: 26px; }
-    .hero-stat .lbl { font-size: 9px; }
-    .hero-actions { gap: 0.5rem; }
-    .btn-primary, .btn-outline { padding: 12px 16px; font-size: 13px; }
-
-    /* Sections */
-    section { padding: 3rem 1rem; }
-    #vibe { padding: 3rem 1rem; }
-    #signup { padding: 3.5rem 1rem; }
-    .section-title { font-size: clamp(30px, 11vw, 42px); }
-    .section-label { font-size: 9px; letter-spacing: 1.5px; }
-
-    /* Filter tabs — make them scrollable on mobile */
-    .filter-tabs {
-      display: flex; flex-wrap: nowrap;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      gap: 0.35rem; padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .filter-tabs::-webkit-scrollbar { display: none; }
-    .filter-tab {
-      flex-shrink: 0;
-      padding: 5px 11px; font-size: 10px; letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    /* Quest cards */
-    .quests-grid { grid-template-columns: 1fr; gap: 0.75rem; }
-    .quest-card { padding: 1rem; }
-    .quest-card .qc-name { font-size: 15px; }
-    .quest-card .qc-desc { font-size: 12px; }
-
-    /* Leaderboard */
-    .lb-row { padding: 0.75rem 0.875rem; gap: 8px; }
-    .lb-rank { font-size: 22px; width: 26px; }
-    .lb-name { font-size: 13px; }
-    .lb-pts { font-size: 22px; }
-
-    /* Activity feed */
-    .activity-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-
-    /* Quest modal */
-    .quest-modal { padding: 1.25rem; margin: 0.75rem; width: calc(100% - 1.5rem); }
-    .qm-title { font-size: 22px; }
-    .qm-actions { gap: 0.5rem; }
-    .qm-btn-main { padding: 13px 16px; font-size: 13px; }
-
-    /* Toast — move to bottom center on mobile */
-    #toast-container {
-      right: 0.75rem; bottom: 1rem; left: 0.75rem;
-      align-items: stretch;
-    }
-    .toast { max-width: 100%; }
-
-    /* Profile page */
-    .profile-stats { grid-template-columns: repeat(2, 1fr); }
-    .pp-stat { padding: 0.75rem; }
-    .pp-stat .stat-num { font-size: 28px; }
-
-    /* Party system */
-    .duration-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-    .dur-btn { padding: 8px 2px; font-size: 10px; }
-    .dur-btn .dur-num { font-size: 18px; }
-    .reward-size-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    .rs-btn { padding: 0.75rem 0.5rem; }
-    .rs-icon { font-size: 20px; }
-    .rs-name { font-size: 12px; }
-    .rs-desc { font-size: 9px; }
-
-    /* Party leaderboard */
-    .party-lb-row { padding: 0.75rem 0.875rem; gap: 8px; }
-    .plb-rank { font-size: 22px; width: 26px; }
-    .plb-ava { width: 32px; height: 32px; font-size: 11px; }
-    .plb-name { font-size: 13px; }
-    .plb-pts { font-size: 22px; }
-
-    /* Party chat */
-    .chat-messages { height: 200px; }
-    .emoji-grid { grid-template-columns: repeat(7, 1fr); }
-    .emoji-item { font-size: 20px; padding: 5px; }
-
-    /* Vacation page */
-    .vp-hero { padding: 3.5rem 1rem 2rem; }
-    .vp-body { padding: 0 1rem 4rem; }
-    .vp-cat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-    .vp-cat-btn { padding: 0.75rem 0.5rem; }
-
-    /* Wheel */
-    .wheel-wrap { width: 260px; height: 260px; }
-    #spin-canvas { width: 260px !important; height: 260px !important; }
-
-    /* Party invite screen */
-    #party-invite-screen > div { padding: 2rem 1rem 3rem; }
-    #pis-name { font-size: 32px; }
-
-    /* Full profile page */
-    .party-body { padding: 1.25rem 1rem 4rem; }
-
-    /* Notif panel full width on mobile */
-    .notif-panel { width: calc(100vw - 2rem); right: -0.5rem; }
-
-    /* Friend chips */
-    .friend-chip { font-size: 12px; padding: 5px 10px; }
-    .fc-ava { width: 22px; height: 22px; font-size: 10px; }
-
-    /* Extend cards grid */
-    .extend-cards-grid { grid-template-columns: repeat(2, 1fr) !important; }
-
-    /* Signup section */
-    .signup-form { gap: 0.5rem; }
-    .signup-form input, .signup-form button { font-size: 13px; }
-  }
+  
 
   /* Also fix medium phones 431-600px */
-  @media (min-width: 431px) and (max-width: 600px) {
-    nav { padding: 0 1.25rem; }
-    section { padding: 3.5rem 1.25rem; }
-    .filter-tabs {
-      flex-wrap: nowrap; overflow-x: auto;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    .filter-tabs::-webkit-scrollbar { display: none; }
-    .filter-tab { flex-shrink: 0; white-space: nowrap; }
-    .quests-grid { grid-template-columns: 1fr; }
-    .activity-grid { grid-template-columns: repeat(2, 1fr); }
-    .emoji-grid { grid-template-columns: repeat(7, 1fr); }
-  }
+  
 
 
   /* ── MOBILE BOTTOM TAB BAR ── */
   #bottom-nav {
     display: none;
   }
-  @media (max-width: 768px) {
-    #bottom-nav {
-      display: flex;
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
-      background: rgba(17,18,20,0.97);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(200,208,220,0.1);
-      padding: 0 0 env(safe-area-inset-bottom, 0px);
-      height: calc(56px + env(safe-area-inset-bottom, 0px));
-      align-items: stretch;
-    }
-    .bn-tab {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 3px; cursor: pointer;
-      color: var(--stone); font-size: 9px;
-      letter-spacing: 0.5px; text-transform: uppercase;
-      font-family: 'DM Mono', monospace;
-      border: none; background: none;
-      transition: color 0.15s;
-      padding: 6px 2px;
-      text-decoration: none;
-    }
-    .bn-tab:hover, .bn-tab.active { color: var(--cream); }
-    .bn-tab.active .bn-icon { color: var(--gold); }
-    .bn-icon { font-size: 20px; line-height: 1; }
-    .bn-label { font-size: 8px; letter-spacing: 0.5px; }
-
-    /* Party tab highlight */
-    .bn-tab.party-tab .bn-icon { font-size: 22px; }
-
-    /* Hide hamburger on mobile since we have bottom nav */
-    .nav-burger { display: none !important; }
-
-    /* Add padding to page bottom so content isnt hidden behind tab bar */
-    body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
-
-    /* Nav links still hidden on mobile — bottom nav handles it */
-    .nav-links { display: none !important; }
-  }
+  
 
 
-  @media (max-width: 768px) {
-    /* Stat strip: 2x2 grid on mobile */
-    .activity-stat-strip {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-    /* Stat font size */
-    .activity-stat-strip > div {
-      padding: 1rem !important;
-    }
-    /* Activity feed: 2 columns on mobile */
-    #activity-feed {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 0.6rem !important;
-    }
-    /* Vibe section padding */
-    .vibe-section {
-      padding: 3rem 1rem !important;
-    }
-    /* Join chaos button full width */
-    .vibe-section .btn-primary {
-      width: 100%;
-      text-align: center;
-    }
-  }
+  
 
 
   .ob-step { animation: fadeIn 0.3s ease; }
   .ob-next-btn { width:100%;padding:14px;border-radius:8px;background:var(--gold);border:none;color:var(--earth);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif; }
   .ob-dot { width:8px;height:8px;border-radius:50%;background:rgba(200,208,220,0.2);transition:background 0.3s; }
   .ob-dot.active { background:var(--gold); }
+
+  /* ═══════════════════════════════════════════════════════════
+     MOBILE — full rewrite for phones
+  ═══════════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+
+    /* ── BASE ── */
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      font-size: 14px;
+    }
+
+    /* ── BOTTOM NAV ── */
+    #bottom-nav {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+      background: rgba(17,18,20,0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(200,208,220,0.1);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      height: calc(56px + env(safe-area-inset-bottom, 0px));
+      align-items: stretch;
+    }
+    .bn-tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; cursor: pointer;
+      color: var(--stone); font-size: 8px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      border: none; background: none;
+      padding: 4px 2px;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bn-tab.active, .bn-tab:hover { color: var(--cream); }
+    .bn-tab.active .bn-icon { color: var(--gold); }
+    .bn-icon { font-size: 18px; line-height: 1; }
+    .bn-label { font-size: 7px; letter-spacing: 0.5px; }
+
+    /* Add bottom padding so content not hidden by nav */
+    body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+
+    /* ── NAV BAR ── */
+    nav {
+      padding: 0 1rem;
+      height: 52px;
+    }
+    .nav-links { display: none !important; }
+    .nav-burger { display: flex !important; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100svh;
+      width: 100%;
+      padding: 70px 1.25rem 3rem;
+      align-items: flex-end;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .hero-content {
+      width: 100%;
+      max-width: 100%;
+    }
+    .hero-badge { font-size: 8px; padding: 4px 10px; letter-spacing: 2px; }
+    .hero-title { font-size: clamp(38px, 13vw, 56px); letter-spacing: 0; }
+    .hero-sub { font-size: 13px; }
+    .hero-actions { flex-direction: column; gap: 0.5rem; }
+    .btn-primary, .btn-outline { 
+      width: 100%; text-align: center;
+      padding: 13px 16px; font-size: 13px;
+    }
+    .hero-stats { gap: 1.25rem; margin-top: 1.5rem; }
+    .hero-stat .num { font-size: 26px; }
+    .hero-stat .lbl { font-size: 9px; }
+
+    /* ── QUEST BOARD SECTION ── */
+    #quests { padding: 2.5rem 1rem 2rem; }
+    .quests-grid { grid-template-columns: 1fr !important; gap: 0.75rem; }
+    .quest-card { padding: 1rem; }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      gap: 0.35rem;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      padding: 5px 10px !important;
+      font-size: 9px !important;
+    }
+
+    /* ── LEADERBOARD ── */
+    #leaderboard { padding: 2.5rem 1rem; }
+    .lb-row { padding: 0.75rem 0.875rem; gap: 8px; }
+    .lb-rank { font-size: 20px; width: 24px; }
+    .lb-name { font-size: 13px; }
+    .lb-pts { font-size: 20px; }
+    .leaderboard-tabs { gap: 0.5rem; }
+
+    /* ── SECTIONS ── */
+    section { padding: 2.5rem 1rem; }
+    .section-title { font-size: clamp(28px, 10vw, 42px); }
+    .section-label { font-size: 9px; }
+
+    /* ── QUEST MODAL ── */
+    .quest-modal {
+      padding: 1.25rem;
+      margin: 0.75rem;
+      width: calc(100% - 1.5rem);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .qm-title { font-size: 20px; }
+    .qm-actions { flex-direction: column; gap: 0.5rem; }
+    .qm-btn-main { padding: 13px; font-size: 13px; width: 100%; }
+
+    /* ── PROFILE ── */
+    .profile-stats { grid-template-columns: repeat(2, 1fr) !important; }
+    .pp-stat { padding: 0.75rem; }
+    .pp-stat .stat-num { font-size: 26px; }
+
+    /* ── PARTY ── */
+    .party-body { padding: 1rem 1rem 4rem; }
+    .duration-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 4px; }
+    .dur-btn { padding: 8px 2px; }
+    .dur-btn .dur-num { font-size: 16px; }
+    .dur-label { font-size: 9px; }
+    .reward-size-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; }
+    .rs-btn { padding: 0.65rem 0.4rem; }
+    .rs-icon { font-size: 18px; }
+    .rs-name { font-size: 11px; }
+    .rs-desc { font-size: 8px; }
+    .chat-messages { height: 180px; }
+    .emoji-grid { grid-template-columns: repeat(7, 1fr) !important; }
+    .emoji-item { font-size: 18px; padding: 4px; }
+
+    /* ── TOASTS ── */
+    #toast-container {
+      right: 0.75rem;
+      left: 0.75rem;
+      bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    }
+    .toast { max-width: 100%; }
+
+    /* ── NOTIF PANEL ── */
+    .notif-panel {
+      width: calc(100vw - 2rem);
+      right: 0;
+      left: 1rem;
+    }
+
+    /* ── FRIEND CHIPS ── */
+    .friend-chip { font-size: 11px; padding: 4px 8px; }
+    .fc-ava { width: 20px; height: 20px; font-size: 9px; }
+
+    /* ── SIGNUP SECTION ── */
+    #signup { padding: 3rem 1rem; }
+
+    /* ── STAT STRIP (2x2 on mobile) ── */
+    .activity-stat-strip {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* ── HIDE HAMBURGER (bottom nav replaces it) ── */
+    .nav-burger { display: none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -3644,16 +3621,22 @@ function checkPendingNotifs() {
   updateNavForUser(fresh.username);
   renderLeaderboard();
   checkPendingNotifs();
-  updateBottomNav();
+  // Defer updateBottomNav until DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(updateBottomNav, 50);
+  } else {
+    window.addEventListener('DOMContentLoaded', function() { updateBottomNav(); });
+  }
 })();
 
 // Check for party invite after DOM is fully loaded
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() { checkForPartyInvite(); }, 100);
+  updateBottomNav();
 });
-// Also handle if DOMContentLoaded already fired
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
   setTimeout(function() { checkForPartyInvite(); }, 200);
+  setTimeout(function() { updateBottomNav(); }, 50);
 }
 window.addEventListener('hashchange', function() { checkForPartyInvite(); });
 
@@ -3806,9 +3789,25 @@ function renderQuestsFromPool(pool, filter) {
   const grid = document.getElementById('quests-grid');
   grid.innerHTML = '';
   const level = currentUser ? (currentUser.level || 'normal') : 'normal';
+  var CAT_MAP = {
+    'Sport':    ['Sport','Physical','Endurance','Survival'],
+    'Nature':   ['Nature','Outdoors','Explore'],
+    'Urban':    ['Urban','Travel'],
+    'Social':   ['Social','Creative'],
+    'Food':     ['Food'],
+    'Kindness': ['Kindness'],
+    'Thrill':   ['Thrill'],
+    'Culture':  ['Culture','Skill','Mental']
+  };
   const filtered = pool.filter(function(q) {
-    var diffOk = (!filter || filter === 'all') || q.diff === filter;
-    var catOk  = (!currentCatFilter || currentCatFilter === 'all') || q.type === currentCatFilter;
+    var diffOk = (!filter || filter === 'all') || (q.diff === filter);
+    var catOk;
+    if (!currentCatFilter || currentCatFilter === 'all') {
+      catOk = true;
+    } else {
+      var allowed = CAT_MAP[currentCatFilter] || [currentCatFilter];
+      catOk = allowed.indexOf(q.type) !== -1;
+    }
     return diffOk && catOk;
   });
   filtered.forEach((q, i) => {
